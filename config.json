@@ -1,0 +1,17 @@
+{
+  "team_id": "9013010285",
+  "fuso": "America/Sao_Paulo",
+  "dias": 30,
+  "pessoas": [
+    { "nome": "Duda", "nome_completo": "Maria Eduarda", "pasta": "Duda", "folder_id": "90134018860", "user_id": "112042161" },
+    { "nome": "Rapha", "nome_completo": "Raphael Wallace", "pasta": "Raphael", "folder_id": "90131646706", "user_id": "99966795" }
+  ],
+  "pastas_entrega": [
+    { "nome": "FERNANDA", "folder_id": "90130489968" },
+    { "nome": "ANDERSON", "folder_id": "90130081096" },
+    { "nome": "SUMMIT", "folder_id": "90130096863" },
+    { "nome": "ALIANÇA", "folder_id": "901317882407" },
+    { "nome": "AH CLUB", "folder_id": "90132103257" }
+  ],
+  "status_feitos": ["concluído", "concluido", "no instagram", "postado", "aprovado", "complete", "closed"]
+}
