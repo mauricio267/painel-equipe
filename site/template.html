@@ -4,217 +4,239 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Produtividade Rapha e Duda</title>
+<title>Desempenho de Produtividade Audiovisual</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: barra do topo, placar lado a lado, duelo de métricas, gráfico diário de 30 dias,
-   três painéis (semanas, onde entregou, fila por status), atrasos e fila do que fazer. */
+/* Layout: barra com filtro por pessoa, placar, "fazendo agora", gráfico por dia,
+   entregas por perfil (clicáveis) e pendências em colunas coloridas com busca. Fundo preto. */
 :root {
-  --bg: #04060a; --s1: #0a0f17; --s2: #111a26; --line: #1a2433; --line-2: #26344a;
-  --text: #d6e6ff; --muted: #7089ad; --dim: #4a5d7a;
-  --rapha: #2f7bff; --duda: #7cc4ff; --pink: #2f7bff;
-  --bad: #ff5468; --good: #7df0bf;
-  --display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
-  --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bg: #000; --s1: #0b0c10; --s2: #13151b; --s3: #1b1e26; --line: #1f222b; --line-2: #2b2f3a;
+  --text: #f5f7ff; --muted: #9aa1b2; --dim: #636a7b;
+  --rapha: #3b82f6; --duda: #f472b6;
+  --late: #f87171; --today: #fbbf24; --week: #60a5fa; --later: #a78bfa; --none: #94a3b8;
+  --ok: #34d399;
+  --font: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
   --r: 18px;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.5; }
 a { color: inherit; }
-a:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; border-radius: 4px; }
-.wrap { max-width: 80rem; margin-inline: auto; padding-block: 1.25rem 3rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 1rem; }
-.num { font-family: var(--display); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-.lbl { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--week); outline-offset: 2px; border-radius: 6px; }
+.num { font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.wrap { max-width: 82rem; margin-inline: auto; padding-block: 0 3rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 1.25rem; }
 
-.bar-top { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; padding-bottom: .75rem; border-bottom: 1px solid var(--line); }
-.logo { display: flex; align-items: center; gap: .5rem; font-family: var(--display); font-weight: 800; font-size: 1.05rem; color: var(--pink); }
-.logo i { width: .7rem; height: .7rem; border-radius: 3px; background: var(--pink); box-shadow: 0 0 18px var(--pink); }
-.chip { font-size: .8rem; color: var(--muted); border: 1px solid var(--line-2); border-radius: 99px; padding: .2rem .7rem; white-space: nowrap; }
-.chip.demo { color: var(--bg); background: var(--pink); border-color: var(--pink); font-weight: 600; }
-.spacer { flex: 1; }
+/* Barra do topo */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 20; }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: rgba(0,0,0,.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.top .in { max-width: 82rem; margin-inline: auto; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; padding-block: .7rem; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.logo { display: flex; align-items: center; gap: .5rem; font-weight: 700; margin-right: auto; }
+.logo small { color: var(--muted); font-weight: 500; font-size: .75rem; letter-spacing: .3em; text-transform: uppercase; }
+.seg { display: inline-flex; background: var(--s2); border: 1px solid var(--line-2); border-radius: 99px; padding: 3px; }
+.seg button { border: 0; background: none; padding: .35rem .9rem; border-radius: 99px; cursor: pointer; font-size: .85rem; font-weight: 500; color: var(--muted); display: inline-flex; align-items: center; gap: .4rem; }
+.seg button i { width: .55rem; height: .55rem; border-radius: 50%; background: var(--c, var(--muted)); }
+.seg button[aria-pressed="true"] { background: var(--s3); color: var(--text); box-shadow: inset 0 0 0 1px var(--line-2); }
+.chip { font-size: .78rem; color: var(--muted); border: 1px solid var(--line-2); border-radius: 99px; padding: .25rem .7rem; white-space: nowrap; }
+.chip.demo { color: #000; background: var(--today); border-color: var(--today); font-weight: 600; }
+.live::before { content: ""; display: inline-block; width: .45rem; height: .45rem; border-radius: 50%; background: var(--ok); margin-right: .4rem; vertical-align: 1px; box-shadow: 0 0 8px var(--ok); }
 
-.title { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-block: 1.25rem .5rem; }
-.title h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(2.2rem, 6vw, 4rem); line-height: .95; letter-spacing: -.03em; color: var(--text); text-wrap: balance; }
-.title h1 em { font-style: normal; color: var(--pink); }
-.title p { margin: 0; color: var(--muted); max-width: 42ch; }
+.hero { padding-top: 1.75rem; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+.hero h1 { margin: 0; font-weight: 800; font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1; letter-spacing: -.03em; text-wrap: balance; }
+.hero h1 span { background: linear-gradient(90deg, var(--rapha), var(--duda)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { margin: 0; color: var(--muted); max-width: 44ch; }
 
-.grid { display: grid; gap: 1rem; grid-template-columns: repeat(12, minmax(0, 1fr)); }
-.box { background: var(--s1); border: 1px solid var(--line); border-radius: var(--r); padding: clamp(1rem, 2.2vw, 1.4rem); min-width: 0; display: flex; flex-direction: column; gap: 1rem; }
-.box h2 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--text); }
-.box .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
-.box .note { margin: 0; color: var(--muted); font-size: .85rem; }
-.c6 { grid-column: span 6; } .c4 { grid-column: span 4; } .c8 { grid-column: span 8; } .c12 { grid-column: span 12; }
-@media (max-width: 980px) { .c4, .c6, .c8 { grid-column: span 12; } }
+.box { background: var(--s1); border: 1px solid var(--line); border-radius: var(--r); padding: clamp(1rem, 2.4vw, 1.5rem); min-width: 0; }
+.hd { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.hd h2 { margin: 0; font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: .55rem; }
+.hd h2 .ic { width: 1.9rem; height: 1.9rem; border-radius: 9px; display: grid; place-items: center; background: var(--c); color: #000; flex: none; }
+.hd p { margin: 0; color: var(--muted); font-size: .85rem; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: 1.25rem; }
 
 /* Placar */
-.score { position: relative; overflow: hidden; }
-.score::after { content: ""; position: absolute; inset: auto -20% -60% auto; width: 22rem; height: 22rem; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 22%, transparent), transparent); pointer-events: none; }
-.who { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
-.av { width: 2.75rem; height: 2.75rem; border-radius: 14px; display: grid; place-items: center; background: var(--c); color: var(--bg); font-family: var(--display); font-weight: 800; font-size: 1.2rem; flex: none; }
-.who h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.35rem; color: var(--c); line-height: 1.1; }
-.who p { margin: 0; font-size: .8rem; color: var(--muted); }
-.score-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: center; }
-.hero-n { font-size: clamp(3.5rem, 9vw, 5.5rem); line-height: .85; color: var(--c); }
-.hero-l { color: var(--muted); font-size: .9rem; margin-top: .35rem; }
-.ring { width: 7.5rem; height: 7.5rem; position: relative; flex: none; }
+.score { position: relative; overflow: hidden; border-top: 3px solid var(--c); }
+.score .who { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+.av { width: 2.6rem; height: 2.6rem; border-radius: 12px; display: grid; place-items: center; background: var(--c); color: #000; font-weight: 800; font-size: 1.1rem; flex: none; }
+.who h3 { margin: 0; font-size: 1.25rem; color: var(--c); line-height: 1.1; }
+.who p { margin: 0; color: var(--muted); font-size: .78rem; }
+.state { margin-left: auto; font-size: .75rem; font-weight: 600; padding: .25rem .7rem; border-radius: 99px; white-space: nowrap; }
+.state.ok { color: var(--ok); background: rgba(52,211,153,.12); } .state.warn { color: var(--today); background: rgba(251,191,36,.12); } .state.bad { color: var(--late); background: rgba(248,113,113,.12); }
+.score-main { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.big { font-size: clamp(3.25rem, 8vw, 4.75rem); line-height: .85; color: var(--c); }
+.big-l { color: var(--muted); font-size: .85rem; margin-top: .4rem; }
+.ring { width: 6.5rem; height: 6.5rem; position: relative; flex: none; }
 .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.ring .in { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
-.ring .in b { display: block; font-size: 1.6rem; line-height: 1; color: var(--text); }
-.ring .in span { font-size: .65rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
-.kv { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; }
-.kv div { background: var(--s2); border-radius: 12px; padding: .65rem .75rem; display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
-.kv .k { font-size: .7rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kv .v { font-size: 1.55rem; line-height: 1.1; }
-.kv .v.bad { color: var(--bad); }
-@media (max-width: 520px) { .kv { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ring .in { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; line-height: 1.1; }
+.ring b { font-size: 1.35rem; display: block; }
+.ring span { font-size: .6rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; margin-top: 1rem; }
+.tile { background: var(--s2); border-radius: 12px; padding: .6rem .7rem; border-left: 3px solid var(--t); min-width: 0; }
+.tile .k { font-size: .7rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.tile .v { font-size: 1.35rem; color: var(--text); display: block; line-height: 1.2; white-space: nowrap; }
+@media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-/* Duelo */
-.duel { display: flex; flex-direction: column; gap: .9rem; }
-.duel-row { display: grid; grid-template-columns: 3rem minmax(0, 1fr) minmax(7rem, 12rem) minmax(0, 1fr) 3rem; align-items: center; gap: .6rem; }
-.duel-row .m { text-align: center; font-size: .8rem; color: var(--muted); }
-.duel-row .v { font-size: 1.1rem; }
-.duel-row .v.l { text-align: right; color: var(--rapha); } .duel-row .v.r { color: var(--duda); }
-.track { height: .6rem; background: var(--s2); border-radius: 99px; display: flex; overflow: hidden; }
-.track.l { justify-content: flex-end; }
-.track div { height: 100%; border-radius: 99px; }
-.win { box-shadow: 0 0 14px var(--c); }
-.duel-head { display: grid; grid-template-columns: 1fr auto 1fr; font-family: var(--display); font-weight: 700; }
-.duel-head span:first-child { color: var(--rapha); } .duel-head span:last-child { color: var(--duda); text-align: right; }
-.duel-head span:nth-child(2) { color: var(--dim); }
-@media (max-width: 560px) { .duel-row { grid-template-columns: 2.4rem minmax(0, 1fr) 5.5rem minmax(0, 1fr) 2.4rem; gap: .35rem; } .duel-row .m { font-size: .7rem; } }
+/* Fazendo agora */
+.doing { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: .85rem; }
+.dcard { background: var(--s2); border: 1px solid var(--line-2); border-radius: 14px; padding: .9rem 1rem; display: flex; flex-direction: column; gap: .55rem; position: relative; overflow: hidden; min-width: 0; transition: transform .15s, border-color .15s; }
+.dcard:hover { transform: translateY(-2px); border-color: var(--c); }
+.dcard::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--c); }
+.dcard .row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.mini-av { width: 1.5rem; height: 1.5rem; border-radius: 7px; display: grid; place-items: center; background: var(--c); color: #000; font-size: .7rem; font-weight: 800; flex: none; }
+.dcard .t { font-weight: 600; font-size: .95rem; line-height: 1.3; overflow-wrap: anywhere; text-decoration: none; }
+.dcard a.t:hover { text-decoration: underline; }
+.timer { display: flex; align-items: baseline; gap: .4rem; }
+.timer b { font-size: 1.5rem; color: var(--tc); }
+.timer span { font-size: .78rem; color: var(--muted); }
+.meter { height: .4rem; border-radius: 99px; background: var(--s3); overflow: hidden; }
+.meter div { height: 100%; border-radius: 99px; background: var(--tc); }
+.st { display: inline-flex; align-items: center; gap: .35rem; font-size: .72rem; font-weight: 600; padding: .15rem .55rem; border-radius: 99px; background: color-mix(in srgb, var(--sc) 18%, transparent); color: var(--sc); white-space: nowrap; }
+.st::before { content: ""; width: .4rem; height: .4rem; border-radius: 50%; background: var(--sc); }
+.sub { font-size: .75rem; color: var(--muted); }
+.empty { color: var(--muted); text-align: center; padding: 1.25rem; background: var(--s2); border-radius: 12px; }
 
-/* Gráficos */
-.legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .8rem; color: var(--muted); }
-.legend span::before { content: ""; display: inline-block; width: .65rem; height: .65rem; border-radius: 3px; background: var(--c); margin-right: .4rem; vertical-align: -1px; }
-.chart { position: relative; width: 100%; }
-.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-.tip { position: absolute; pointer-events: none; background: var(--s2); border: 1px solid var(--line-2); border-radius: 10px; padding: .4rem .6rem; font-size: .78rem; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+/* Gráfico por dia */
+.legend { display: flex; gap: .5rem; flex-wrap: wrap; }
+.legend button { border: 1px solid var(--line-2); background: var(--s2); border-radius: 99px; padding: .25rem .7rem; font-size: .8rem; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem; }
+.legend button i { width: .6rem; height: .6rem; border-radius: 3px; background: var(--c); }
+.legend button[aria-pressed="false"] { opacity: .4; }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; }
+.tip { position: absolute; pointer-events: none; background: var(--s3); border: 1px solid var(--line-2); border-radius: 10px; padding: .45rem .65rem; font-size: .78rem; white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 3; }
 .tip .d { color: var(--muted); }
 .tip .r::before { content: ""; display: inline-block; width: .5rem; height: .5rem; border-radius: 2px; background: var(--c); margin-right: .4rem; }
+.chart-sum { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: .75rem; font-size: .85rem; color: var(--muted); }
+.chart-sum b { color: var(--text); }
 
-.hbars { display: flex; flex-direction: column; gap: .55rem; }
-.hb { display: grid; grid-template-columns: minmax(5.5rem, 38%) minmax(0, 1fr) 2rem; gap: .6rem; align-items: center; font-size: .85rem; }
-.hb .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
-.hb .tr { height: .55rem; background: var(--s2); border-radius: 99px; overflow: hidden; }
-.hb .tr div { height: 100%; background: var(--c); border-radius: 99px; }
-.hb .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
-.sub-h { font-family: var(--display); font-weight: 700; font-size: .95rem; margin: .25rem 0 0; color: var(--c); }
+/* Tempo por tarefa */
+.tkpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .75rem; margin-bottom: 1rem; }
+.tk { background: var(--s2); border-radius: 14px; padding: .85rem 1rem; border-top: 3px solid var(--c); }
+.tk .k { font-size: .75rem; color: var(--muted); display: block; }
+.tk .v { font-size: 1.7rem; display: block; line-height: 1.15; }
+.tk .s { font-size: .75rem; color: var(--muted); }
+.tlist { display: flex; flex-direction: column; gap: .4rem; max-height: 30rem; overflow-y: auto; padding-right: .25rem; }
+.trow { display: grid; grid-template-columns: auto minmax(0, 1.6fr) minmax(6rem, 1fr) 5.5rem; gap: .75rem; align-items: center; background: var(--s2); border-radius: 10px; padding: .55rem .75rem; font-size: .88rem; }
+.trow a, .trow .t { text-decoration: none; overflow-wrap: anywhere; } .trow a:hover { text-decoration: underline; }
+.trow .tb { height: .55rem; border-radius: 99px; background: var(--s3); overflow: hidden; }
+.trow .tb div { height: 100%; border-radius: 99px; background: var(--tc); }
+.trow .tv { text-align: right; font-weight: 700; color: var(--tc); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.trow .tv small { display: block; font-weight: 400; font-size: .68rem; color: var(--muted); }
+@media (max-width: 560px) { .trow { grid-template-columns: auto minmax(0, 1fr) 4.8rem; } .trow .tb { display: none; } }
 
-.stack { display: flex; height: 2.25rem; border-radius: 10px; overflow: hidden; background: var(--s2); }
-.stack div { display: grid; place-items: center; font-size: .75rem; font-weight: 600; color: var(--bg); min-width: 0; }
-.stack-legend { display: flex; gap: .75rem; flex-wrap: wrap; font-size: .75rem; color: var(--muted); }
-.stack-legend span::before { content: ""; display: inline-block; width: .55rem; height: .55rem; border-radius: 2px; background: var(--c); margin-right: .35rem; }
+/* Entregas por mês */
+.months { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.month { background: var(--s2); border-radius: 14px; padding: 1rem; display: flex; flex-direction: column; gap: .75rem; min-width: 0; }
+.month.atual { box-shadow: inset 0 0 0 1px var(--line-2); background: linear-gradient(180deg, #171a24, var(--s2)); }
+.month h3 { margin: 0; font-size: .85rem; text-transform: capitalize; color: var(--muted); display: flex; justify-content: space-between; }
+.month h3 b { color: var(--text); font-size: 1.6rem; line-height: 1; }
+.mbar { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr) 2.5rem; gap: .5rem; align-items: center; font-size: .82rem; }
+.mbar .tr { height: .7rem; background: var(--s3); border-radius: 99px; overflow: hidden; }
+.mbar .tr div { height: 100%; border-radius: 99px; background: var(--c); }
+.mbar .v { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .months { grid-template-columns: 1fr; } }
 
-/* Listas e tabela */
-.tbl { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-th { text-align: left; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: .5rem .6rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
-td { padding: .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-tr:last-child td { border-bottom: 0; }
-td.dt { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
-td a, .list a { text-decoration: none; } td a:hover, .list a:hover { text-decoration: underline; text-decoration-color: var(--pink); }
-.dot { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; background: var(--c); margin-right: .4rem; }
-.pill { display: inline-block; padding: .05rem .55rem; border-radius: 99px; font-size: .72rem; white-space: nowrap; border: 1px solid currentColor; }
-.pill.bad { color: var(--bad); } .pill.hot { color: var(--pink); } .pill.ok { color: var(--good); }
-.empty { color: var(--muted); padding: .75rem 0; text-align: center; }
+/* Entregas por perfil */
+.dest { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr)); gap: .75rem; }
+.dtile { text-align: left; border: 1px solid var(--line-2); background: linear-gradient(160deg, color-mix(in srgb, var(--c) 22%, var(--s2)), var(--s2) 70%); border-radius: 14px; padding: .9rem 1rem; cursor: pointer; display: flex; flex-direction: column; gap: .35rem; min-width: 0; transition: transform .15s, border-color .15s; }
+.dtile:hover { transform: translateY(-2px); }
+.dtile[aria-pressed="true"] { border-color: var(--c); box-shadow: 0 0 0 1px var(--c), 0 10px 30px color-mix(in srgb, var(--c) 25%, transparent); }
+.dtile .nm { font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--c); }
+.dtile .n { font-size: 2rem; line-height: 1; }
+.dtile .l { font-size: .72rem; color: var(--muted); }
+.dtile .split { display: flex; height: .35rem; border-radius: 99px; overflow: hidden; background: var(--s3); margin-top: .25rem; }
+.dtile .split div { height: 100%; }
+.dlist { margin-top: 1rem; display: flex; flex-direction: column; gap: .4rem; }
+.ditem { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .65rem; align-items: center; padding: .55rem .75rem; background: var(--s2); border-radius: 10px; font-size: .9rem; }
+.ditem a { text-decoration: none; overflow-wrap: anywhere; } .ditem a:hover { text-decoration: underline; }
+.ditem .dt { font-size: .78rem; color: var(--muted); white-space: nowrap; }
 
-.todo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1.5rem; }
-.todo-col { display: flex; flex-direction: column; gap: .4rem; min-width: 0; }
-.grp { margin: .6rem 0 0; display: flex; align-items: center; gap: .45rem; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-.grp b { color: var(--c); }
-.grp.urg { color: var(--bad); }
-.list { list-style: none; margin: 0; padding: 0; }
-.list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .75rem; padding: .5rem 0; border-bottom: 1px dashed var(--line); font-size: .9rem; }
-.list li:last-child { border-bottom: 0; }
-.list .meta { display: block; font-size: .72rem; color: var(--muted); }
-.list .t { min-width: 0; overflow-wrap: anywhere; }
-.list .done .t a, .list .done .t { color: var(--muted); }
-.more { font-size: .78rem; color: var(--muted); }
+/* Pendências em colunas */
+.tools { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+.search { flex: 1 1 14rem; display: flex; align-items: center; gap: .5rem; background: var(--s2); border: 1px solid var(--line-2); border-radius: 12px; padding: 0 .8rem; }
+.search input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--text); font: 400 .95rem var(--font); padding: .65rem 0; }
+.search:focus-within { border-color: var(--week); }
+.cols { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(15.5rem, 1fr); gap: .85rem; overflow-x: auto; padding-bottom: .5rem; scroll-snap-type: x proximity; }
+.col { background: var(--s2); border-radius: 14px; border-top: 3px solid var(--c); display: flex; flex-direction: column; min-width: 0; max-height: 34rem; scroll-snap-align: start; }
+.col-h { display: flex; align-items: center; justify-content: space-between; padding: .75rem .9rem .5rem; }
+.col-h b { font-size: .9rem; color: var(--c); }
+.col-h span { font-size: .8rem; font-weight: 700; background: color-mix(in srgb, var(--c) 18%, transparent); color: var(--c); border-radius: 99px; padding: .05rem .55rem; }
+.col-b { padding: .25rem .6rem .7rem; display: flex; flex-direction: column; gap: .5rem; overflow-y: auto; }
+.pcard { background: var(--s1); border: 1px solid var(--line-2); border-left: 3px solid var(--pc); border-radius: 10px; padding: .6rem .7rem; display: flex; flex-direction: column; gap: .4rem; text-decoration: none; transition: border-color .15s, transform .15s; }
+.pcard:hover { border-color: var(--pc); transform: translateX(2px); }
+.pcard .t { font-size: .88rem; font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
+.pcard .m { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; font-size: .72rem; color: var(--muted); }
+.pri { font-size: .68rem; font-weight: 700; padding: .05rem .45rem; border-radius: 5px; }
+.pri.u { background: rgba(248,113,113,.18); color: var(--late); } .pri.a { background: rgba(251,191,36,.16); color: var(--today); }
+.col-empty { font-size: .8rem; color: var(--dim); text-align: center; padding: 1rem .5rem; }
 
-.state { display: inline-flex; align-items: center; gap: .4rem; font-size: .78rem; font-weight: 600; padding: .25rem .65rem; border-radius: 99px; margin-left: auto; white-space: nowrap; }
-.state::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: currentColor; }
-.state.ok { color: var(--good); background: color-mix(in srgb, var(--good) 12%, transparent); }
-.state.warn { color: #ffc46b; background: color-mix(in srgb, #ffc46b 12%, transparent); }
-.state.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); }
-.resumo { margin: 0; font-size: .95rem; color: var(--text); max-width: 46ch; }
-.resumo b { color: var(--c); font-variant-numeric: tabular-nums; }
-.live { display: inline-flex; align-items: center; gap: .45rem; }
-.live::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 0 var(--good); animation: pulso 2s infinite; }
-@keyframes pulso { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--good) 60%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
-@media (prefers-reduced-motion: reduce) { .live::before { animation: none; } }
-footer { color: var(--dim); font-size: .78rem; padding-top: 1rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; }
+footer { color: var(--dim); font-size: .78rem; border-top: 1px solid var(--line); padding-top: 1rem; display: flex; flex-wrap: wrap; gap: .4rem 1.5rem; }
+@media (prefers-reduced-motion: reduce) { .dcard, .dtile, .pcard { transition: none; } }
 </style>
 </head>
 <body>
 <script type="application/json" id="dados">__DADOS__</script>
-<main class="wrap">
-  <div class="bar-top">
-    <span class="logo"><i aria-hidden="true"></i>Produtividade</span>
-    <span class="chip" id="periodo"></span>
-    <span class="spacer"></span>
-    <span class="chip" id="stamp"></span>
-  </div>
 
-  <div class="title">
-    <h1><em>Rapha</em> &amp; <em>Duda</em></h1>
+<header class="top">
+  <div class="in">
+    <span class="logo">Desempenho <small>Audiovisual</small></span>
+    <div class="seg" role="group" aria-label="Filtrar por pessoa" id="seg"></div>
+    <span class="chip live" id="stamp"></span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>Desempenho de <span>Produtividade</span></h1>
     <p id="lede"></p>
   </div>
 
-  <div class="grid" id="placar"></div>
+  <div class="grid2" id="placar"></div>
 
-  <div class="grid">
-    <section class="box c6" id="duelo" aria-labelledby="duelo-h">
-      <div class="hd"><h2 id="duelo-h">Lado a lado</h2><span class="note" id="duelo-n"></span></div>
-      <div class="duel-head"><span>Rapha</span><span>vs</span><span>Duda</span></div>
-      <div class="duel" id="duel"></div>
-    </section>
-    <section class="box c6" id="semana" aria-labelledby="sem-h">
-      <div class="hd"><h2 id="sem-h">Entregas por semana</h2><span class="note">últimas 5 semanas</span></div>
-      <div class="legend" id="leg-sem"></div>
-      <div class="chart" id="ch-sem"></div>
-    </section>
-  </div>
-
-  <section class="box" id="diario" aria-labelledby="dia-h">
-    <div class="hd"><h2 id="dia-h">Entregas por dia</h2><span class="note">últimos 30 dias</span></div>
-    <div class="legend" id="leg-dia"></div>
-    <div class="chart" id="ch-dia"></div>
+  <section class="box" id="fazendo" aria-labelledby="h-faz">
+    <div class="hd"><h2 id="h-faz"><span class="ic" style="--c:var(--ok)" aria-hidden="true">▶</span>Fazendo agora</h2><p>Cards em edição, conferência ou legenda, e há quanto tempo estão nesse status</p></div>
+    <div class="doing" id="doing"></div>
   </section>
 
-  <div class="grid">
-    <section class="box c6" id="destino" aria-labelledby="dest-h">
-      <div class="hd"><h2 id="dest-h">Onde as entregas foram parar</h2><span class="note" id="dest-n"></span></div>
-      <p class="note" id="dest-exp"></p>
-      <div id="dest"></div>
-    </section>
-    <section class="box c6" id="fila" aria-labelledby="fila-h">
-      <div class="hd"><h2 id="fila-h">Fila em aberto por status</h2><span class="note">só na pasta de cada um</span></div>
-      <div id="status"></div>
-    </section>
-  </div>
-
-  <section class="box" id="atrasos" aria-labelledby="atr-h">
-    <div class="hd"><h2 id="atr-h">Atrasos</h2><span class="note">só tarefas na pasta de cada um</span></div>
-    <div class="tbl">
-      <table>
-        <thead><tr><th>Pessoa</th><th>Demanda</th><th>Atraso</th><th>Status</th><th>Prazo</th></tr></thead>
-        <tbody id="atr"></tbody>
-      </table>
+  <section class="box" id="tempo" aria-labelledby="h-tempo">
+    <div class="hd"><h2 id="h-tempo"><span class="ic" style="--c:#22d3ee" aria-hidden="true">◷</span>Tempo por tarefa</h2><p>Da criação do card até a entrega, nos últimos 30 dias</p></div>
+    <div class="tkpis" id="tkpis"></div>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Ordenar" id="tord"></div>
     </div>
+    <div class="tlist" id="tlist"></div>
   </section>
 
-  <section class="box" id="fazer" aria-labelledby="faz-h">
-    <div class="hd"><h2 id="faz-h">O que fazer agora</h2><span class="note">atrasadas, hoje, próximos 7 dias e sem prazo</span></div>
-    <div class="todo" id="todo"></div>
+  <section class="box" id="por-dia" aria-labelledby="h-dia">
+    <div class="hd"><h2 id="h-dia"><span class="ic" style="--c:var(--week)" aria-hidden="true">▮</span>Entregas por dia</h2><div class="legend" id="legend"></div></div>
+    <div class="chart" id="chart"></div>
+    <div class="chart-sum" id="chart-sum"></div>
+  </section>
+
+  <section class="box" id="por-mes" aria-labelledby="h-mes">
+    <div class="hd"><h2 id="h-mes"><span class="ic" style="--c:var(--later)" aria-hidden="true">▤</span>Entregas por mês</h2><p id="mes-sub"></p></div>
+    <div class="months" id="months"></div>
+  </section>
+
+  <section class="box" id="perfis" aria-labelledby="h-dest">
+    <div class="hd"><h2 id="h-dest"><span class="ic" style="--c:#fb923c" aria-hidden="true">↗</span>Para onde foram as entregas</h2><p id="dest-sub"></p></div>
+    <div class="dest" id="dest"></div>
+    <div class="dlist" id="dlist"></div>
+  </section>
+
+  <section class="box" id="pendencias" aria-labelledby="h-pend">
+    <div class="hd"><h2 id="h-pend"><span class="ic" style="--c:var(--late)" aria-hidden="true">!</span>Pendências</h2><p>Só os cards nas pastas Duda e Raphael. Clique para abrir no ClickUp.</p></div>
+    <div class="tools">
+      <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="busca" type="search" placeholder="Buscar demanda..." aria-label="Buscar demanda"></label>
+    </div>
+    <div class="cols" id="cols"></div>
   </section>
 
   <footer>
-    <span id="foot-dados"></span>
-    <span id="foot-feito"></span>
-    <span id="foot-auto"></span>
+    <span id="foot1"></span>
+    <span>Contam como feitos: concluído, postado, no instagram, aprovado, fechado, ou card que saiu das pastas Duda e Raphael.</span>
+    <span>Atualizado a cada 15 minutos, das 8h às 20h. A página se recarrega sozinha.</span>
   </footer>
 </main>
 
@@ -222,15 +244,26 @@ footer { color: var(--dim); font-size: .78rem; padding-top: 1rem; border-top: 1p
 (function () {
   const D = JSON.parse(document.getElementById('dados').textContent);
   const COR = { Rapha: 'var(--rapha)', Duda: 'var(--duda)' };
-  const cor = (n) => COR[n] || 'var(--pink)';
-  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v.slice(4, -1)).trim();
+  const HEX = { Rapha: '#3b82f6', Duda: '#f472b6' };
+  const DEST = { 'Própria pasta': '#94a3b8', FERNANDA: '#fb923c', ANDERSON: '#34d399', SUMMIT: '#facc15', 'ALIANÇA': '#22d3ee', 'AH CLUB': '#c084fc', 'Outras pastas': '#64748b' };
+  const GRUPOS = [['Atrasada', 'Atrasadas', 'var(--late)'], ['Hoje', 'Hoje', 'var(--today)'], ['Próximos 7 dias', 'Próximos 7 dias', 'var(--week)'], ['Mais adiante', 'Mais adiante', 'var(--later)'], ['Sem prazo', 'Sem prazo', 'var(--none)']];
+  const PALETA_ST = ['#60a5fa', '#a78bfa', '#f472b6', '#fb923c', '#34d399', '#22d3ee', '#facc15'];
   const n = (v) => (v == null ? '—' : Number(v).toLocaleString('pt-BR'));
   const br = (s) => (s ? s.slice(8, 10) + '/' + s.slice(5, 7) : 'sem prazo');
   const pct = (a, b) => (b ? Math.round((a / b) * 100) : null);
+  const dur = (m) => {
+    if (m == null) return '—';
+    if (m < 60) return `${m} min`;
+    const h = Math.floor(m / 60), d = Math.floor(h / 24);
+    return d ? `${d}d ${h % 24}h` : `${h}h ${m % 60}min`;
+  };
+  const durCor = (m) => (m == null ? 'var(--muted)' : m < 240 ? 'var(--ok)' : m < 1440 ? 'var(--today)' : 'var(--late)');
+  const stCor = (t) => t.status_cor || PALETA_ST[[...(t.status || '')].reduce((s, c) => s + c.charCodeAt(0), 0) % PALETA_ST.length];
   const NS = 'http://www.w3.org/2000/svg';
   const el = (tag, attrs, ...kids) => {
     const e = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null) continue;
       if (k === 'style') e.style.cssText = v; else if (k === 'text') e.textContent = v; else e.setAttribute(k, v);
     }
     for (const kid of kids) if (kid != null) e.append(kid);
@@ -242,247 +275,272 @@ footer { color: var(--dim); font-size: .78rem; padding-top: 1rem; border-top: 1p
     for (const kid of kids) if (kid != null) e.append(kid);
     return e;
   };
-  const link = (t) => (typeof t.url === 'string' && t.url.startsWith('https://app.clickup.com/'))
-    ? el('a', { href: t.url, target: '_blank', rel: 'noopener', text: t.nome }) : document.createTextNode(t.nome);
+  const okUrl = (u) => typeof u === 'string' && u.startsWith('https://app.clickup.com/');
+  const titulo = (t, cls) => okUrl(t.url) ? el('a', { class: cls, href: t.url, target: '_blank', rel: 'noopener', text: t.nome }) : el('span', { class: cls, text: t.nome });
 
   const P = [...D.pessoas].sort((a, b) => (a.nome === 'Rapha' ? -1 : b.nome === 'Rapha' ? 1 : 0));
-  const [A, B] = P;
+  const estado = { pessoa: 'Todos', busca: '', destino: null, series: new Set(P.map((p) => p.nome)) };
+  const visiveis = () => P.filter((p) => estado.pessoa === 'Todos' || p.nome === estado.pessoa);
 
-  // Topo
-  document.getElementById('periodo').textContent = D.mes_nome[0].toUpperCase() + D.mes_nome.slice(1) + ' · semana ' + br(D.semana_ini) + ' a ' + br(D.semana_fim);
-  document.getElementById('stamp').textContent = 'Atualizado ' + D.gerado_em;
-  if (D.exemplo) document.querySelector('.bar-top').insertBefore(el('span', { class: 'chip demo', text: 'Dados de exemplo' }), document.querySelector('.spacer'));
-  const total = A.mes.entregues + B.mes.entregues;
-  document.getElementById('lede').textContent = `${n(total)} entregas em ${D.mes_nome}, ${n(A.atrasadas + B.atrasadas)} atrasadas e ${n(A.abertas + B.abertas)} na fila agora.`;
-
-  // Placar
-  const placar = document.getElementById('placar');
-  for (const p of P) {
-    const noPrazo = pct(p.mes.no_prazo, p.mes.com_prazo);
-    const R = 52, C = 2 * Math.PI * R;
-    const ring = el('div', { class: 'ring', role: 'img', 'aria-label': `${noPrazo ?? 0}% entregue no prazo` });
-    ring.append(sv('svg', { viewBox: '0 0 120 120' },
-      sv('circle', { cx: 60, cy: 60, r: R, fill: 'none', stroke: css('var(--s2)'), 'stroke-width': 10 }),
-      sv('circle', { cx: 60, cy: 60, r: R, fill: 'none', stroke: css(cor(p.nome)), 'stroke-width': 10, 'stroke-linecap': 'round',
-        'stroke-dasharray': `${C * (noPrazo || 0) / 100} ${C}` })));
-    ring.append(el('div', { class: 'in' }, el('div', {}, el('b', { class: 'num', text: noPrazo == null ? '—' : noPrazo + '%' }), el('span', { text: 'no prazo' }))));
-    const kv = (k, v, cls) => el('div', {}, el('span', { class: 'k', text: k }), el('span', { class: 'v num' + (cls ? ' ' + cls : ''), text: n(v) }));
-    const estado = p.atrasadas >= 3 ? ['bad', 'Atrasado'] : p.atrasadas > 0 || p.hoje > 2 ? ['warn', 'Atenção'] : ['ok', 'Em dia'];
-    const B = (v) => el('b', { text: n(v) });
-    const resumo = el('p', { class: 'resumo' }, 'Entregou ', B(p.mes.entregues), ` tarefas em ${D.mes_nome}. `,
-      p.atrasadas ? el('span', {}, 'Tem ', B(p.atrasadas), p.atrasadas === 1 ? ' atrasada' : ' atrasadas', ' e ') : 'Nada atrasado e ',
-      B(p.hoje), ' para hoje.');
-    placar.append(el('section', { class: 'box score c6', style: '--c:' + cor(p.nome), 'aria-label': 'Placar ' + p.nome },
-      el('div', { class: 'who' }, el('div', { class: 'av', 'aria-hidden': 'true', text: p.nome[0] }),
-        el('div', {}, el('h3', { text: p.nome }), el('p', { text: p.nome_completo + ' · pasta ' + p.pasta })),
-        el('span', { class: 'state ' + estado[0], text: estado[1] })),
-      resumo,
-      el('div', { class: 'score-main' },
-        el('div', {}, el('div', { class: 'num hero-n', text: n(p.mes.entregues) }), el('div', { class: 'hero-l', text: `entregas em ${D.mes_nome} · ${n(p.media_dia)} por dia` })),
-        ring),
-      el('div', { class: 'kv' }, kv('Na semana', p.semana.feitas + '/' + p.semana.total), kv('Hoje', p.hoje), kv('Atrasadas', p.atrasadas, 'bad'), kv('Na fila', p.abertas))));
-    placar.lastChild.querySelector('.kv div .v').textContent = `${n(p.semana.feitas)}/${n(p.semana.total)}`;
+  // ---------- Topo ----------
+  const seg = document.getElementById('seg');
+  for (const nome of ['Todos', ...P.map((p) => p.nome)]) {
+    const b = el('button', { type: 'button', 'aria-pressed': String(nome === 'Todos'), style: '--c:' + (COR[nome] || 'var(--muted)') }, nome !== 'Todos' ? el('i', { 'aria-hidden': 'true' }) : null, nome);
+    b.addEventListener('click', () => {
+      estado.pessoa = nome;
+      estado.series = new Set(nome === 'Todos' ? P.map((p) => p.nome) : [nome]);
+      seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      render();
+    });
+    seg.append(b);
   }
-
-  // Duelo
-  const metricas = [
-    ['Entregas no mês', (p) => p.mes.entregues, true],
-    ['Média por dia', (p) => p.media_dia, true],
-    ['% no prazo', (p) => pct(p.mes.no_prazo, p.mes.com_prazo), true],
-    ['Feitas na semana', (p) => p.semana.feitas, true],
-    ['Atrasadas', (p) => p.atrasadas, false],
-    ['Sem prazo', (p) => p.sem_prazo, false],
-  ];
-  const duel = document.getElementById('duel');
-  for (const [nome, f, maiorMelhor] of metricas) {
-    const a = f(A) ?? 0, b = f(B) ?? 0, max = Math.max(a, b, 1);
-    const ganhaA = a !== b && (maiorMelhor ? a > b : a < b), ganhaB = a !== b && !ganhaA;
-    const fmt = (v) => (nome === '% no prazo' ? (v ?? 0) + '%' : n(v));
-    duel.append(el('div', { class: 'duel-row' },
-      el('span', { class: 'v l num', text: fmt(a) }),
-      el('div', { class: 'track l' }, el('div', { class: ganhaA ? 'win' : '', style: `--c:${cor(A.nome)};background:var(--c);width:${(a / max) * 100}%` })),
-      el('span', { class: 'm', text: nome }),
-      el('div', { class: 'track' }, el('div', { class: ganhaB ? 'win' : '', style: `--c:${cor(B.nome)};background:var(--c);width:${(b / max) * 100}%` })),
-      el('span', { class: 'v r num', text: fmt(b) })));
-  }
-  document.getElementById('duelo-n').textContent = 'barra com brilho = melhor resultado';
-
-  // Legendas
-  for (const id of ['leg-sem', 'leg-dia']) {
-    const lg = document.getElementById(id);
-    for (const p of P) lg.append(el('span', { style: '--c:' + cor(p.nome), text: p.nome }));
-  }
-
-  // Tooltip compartilhado
-  const tipFor = (box) => { const t = el('div', { class: 'tip', hidden: '' }); box.append(t); return t; };
-  const showTip = (box, tip, x, titulo, linhas) => {
-    tip.replaceChildren(el('div', { class: 'd', text: titulo }), ...linhas.map(([nm, v]) => el('div', { class: 'r', style: '--c:' + cor(nm), text: `${nm}: ${n(v)}` })));
-    tip.hidden = false;
-    const w = tip.offsetWidth;
-    tip.style.left = Math.min(Math.max(0, x - w / 2), box.clientWidth - w) + 'px';
-    tip.style.top = '0px';
+  if (D.exemplo) seg.after(el('span', { class: 'chip demo', text: 'Dados de exemplo' }));
+  const stamp = document.getElementById('stamp');
+  const gerado = Date.parse(D.gerado_iso || '');
+  const tempo = () => {
+    const min = gerado ? Math.max(0, Math.round((Date.now() - gerado) / 60000)) : null;
+    stamp.textContent = min == null ? 'Atualizado ' + D.gerado_em : min < 1 ? 'Atualizado agora' : min < 60 ? `Atualizado há ${min} min` : 'Atualizado ' + D.gerado_em;
   };
+  tempo(); setInterval(tempo, 30000);
+  if (!D.exemplo) setTimeout(() => location.reload(), 10 * 60 * 1000);
+  document.getElementById('foot1').textContent = 'Dados do ClickUp: pastas Duda e Raphael e os cards deles enviados para outras pastas.';
 
-  function semanas() {
-    const box = document.getElementById('ch-sem');
+  // ---------- Placar ----------
+  function placar() {
+    const box = document.getElementById('placar');
     box.replaceChildren();
-    const W = Math.max(280, box.clientWidth), H = 220, m = { t: 22, b: 26, l: 4, r: 4 };
-    const max = Math.max(1, ...P.flatMap((p) => p.ritmo));
-    const gw = (W - m.l - m.r) / D.semanas.length, bw = Math.min(30, gw * 0.28);
-    const y = (v) => H - m.b - (v / max) * (H - m.t - m.b);
-    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Entregas por semana' });
-    svg.append(sv('line', { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, stroke: css('var(--line-2)') }));
-    const tip = tipFor(box);
-    D.semanas.forEach((s, i) => {
-      const cx = m.l + gw * i + gw / 2;
-      P.forEach((p, j) => {
-        const v = p.ritmo[i], x = cx + (j === 0 ? -bw - 2 : 2);
-        svg.append(sv('rect', { x, y: y(v), width: bw, height: Math.max(2, H - m.b - y(v)), rx: 6, fill: css(cor(p.nome)) }));
-        svg.append(sv('text', { x: x + bw / 2, y: y(v) - 6, 'text-anchor': 'middle', fill: css('var(--text)'), 'font-size': 11, 'font-family': 'Instrument Sans, sans-serif', text: n(v) }));
+    const V = visiveis();
+    const soma = (f) => V.reduce((s, p) => s + (f(p) || 0), 0);
+    document.getElementById('lede').textContent = `${n(soma((p) => p.mes.entregues))} entregas em ${D.mes_nome}, ${n(soma((p) => p.fazendo.length))} em andamento agora e ${n(soma((p) => p.atrasadas))} atrasadas.`;
+    for (const p of V) {
+      const np = pct(p.mes.no_prazo, p.mes.com_prazo);
+      const R = 52, C = 2 * Math.PI * R;
+      const est = p.atrasadas >= 3 ? ['bad', 'Atrasado'] : p.atrasadas > 0 || p.hoje > 2 ? ['warn', 'Atenção'] : ['ok', 'Em dia'];
+      const ring = el('div', { class: 'ring', role: 'img', 'aria-label': `${np ?? 0}% no prazo` },
+        sv('svg', { viewBox: '0 0 120 120' },
+          sv('circle', { cx: 60, cy: 60, r: R, fill: 'none', stroke: '#1b1e26', 'stroke-width': 11 }),
+          sv('circle', { cx: 60, cy: 60, r: R, fill: 'none', stroke: HEX[p.nome] || '#60a5fa', 'stroke-width': 11, 'stroke-linecap': 'round', 'stroke-dasharray': `${C * (np || 0) / 100} ${C}` })),
+        el('div', { class: 'in' }, el('div', {}, el('b', { class: 'num', text: np == null ? '—' : np + '%' }), el('span', { text: 'no prazo' }))));
+      const tile = (k, v, c) => el('div', { class: 'tile', style: '--t:' + c }, el('span', { class: 'k', text: k }), el('span', { class: 'v num', text: v }));
+      box.append(el('section', { class: 'box score', style: '--c:' + COR[p.nome] },
+        el('div', { class: 'who' }, el('div', { class: 'av', 'aria-hidden': 'true', text: p.nome[0] }),
+          el('div', {}, el('h3', { text: p.nome }), el('p', { text: p.nome_completo })), el('span', { class: 'state ' + est[0], text: est[1] })),
+        el('div', { class: 'score-main' },
+          el('div', {}, el('div', { class: 'big num', text: n(p.mes.entregues) }), el('div', { class: 'big-l', text: `entregas em ${D.mes_nome} · ${n(p.media_dia)} por dia` })),
+          ring),
+        el('div', { class: 'tiles' },
+          tile('Fazendo agora', n(p.fazendo.length), 'var(--ok)'),
+          tile('Para hoje', n(p.hoje), 'var(--today)'),
+          tile('Atrasadas', n(p.atrasadas), 'var(--late)'),
+          tile('Tempo por demanda', dur(p.tempo_medio_producao ?? p.tempo_medio_registrado), 'var(--later)'))));
+    }
+  }
+
+  // ---------- Fazendo agora ----------
+  const minutosAgora = (t) => (t.desde ? Math.max(0, Math.round((Date.now() - Date.parse(t.desde)) / 60000)) : t.minutos_status);
+  function fazendo() {
+    const box = document.getElementById('doing');
+    box.replaceChildren();
+    const itens = visiveis().flatMap((p) => p.fazendo.map((t) => ({ ...t, pessoa: p.nome })));
+    if (!itens.length) { box.append(el('div', { class: 'empty', text: 'Ninguém com card em andamento agora.' })); return; }
+    for (const t of itens) {
+      const m = minutosAgora(t);
+      const card = el('article', { class: 'dcard', style: `--c:${COR[t.pessoa]};--tc:${durCor(m)}` },
+        el('div', { class: 'row' }, el('span', { class: 'mini-av', 'aria-hidden': 'true', text: t.pessoa[0] }), el('span', { class: 'st', style: '--sc:' + stCor(t), text: t.status }),
+          t.prazo ? el('span', { class: 'sub', text: 'prazo ' + br(t.prazo) }) : null),
+        titulo(t, 't'),
+        el('div', { class: 'timer' }, el('b', { class: 'num', 'data-desde': t.desde || '', 'data-min': m ?? '', text: dur(m) }), el('span', { text: m == null ? 'tempo no status indisponível' : 'neste status' })),
+        el('div', { class: 'meter', 'aria-hidden': 'true' }, el('div', { style: `width:${Math.min(100, ((m || 0) / 2880) * 100)}%` })),
+        t.minutos_producao ? el('span', { class: 'sub', text: `${dur(t.minutos_producao)} de produção no total` }) : null);
+      box.append(card);
+    }
+  }
+  setInterval(() => {
+    document.querySelectorAll('.timer b[data-desde]').forEach((b) => {
+      if (!b.dataset.desde) return;
+      const m = Math.max(0, Math.round((Date.now() - Date.parse(b.dataset.desde)) / 60000));
+      b.textContent = dur(m);
+      b.closest('.dcard').style.setProperty('--tc', durCor(m));
+    });
+  }, 60000);
+
+  // ---------- Gráfico por dia ----------
+  const legend = document.getElementById('legend');
+  function legenda() {
+    legend.replaceChildren();
+    for (const p of P) {
+      const on = estado.series.has(p.nome);
+      const b = el('button', { type: 'button', 'aria-pressed': String(on), style: '--c:' + COR[p.nome] }, el('i', { 'aria-hidden': 'true' }), p.nome);
+      b.addEventListener('click', () => { on ? estado.series.delete(p.nome) : estado.series.add(p.nome); if (!estado.series.size) estado.series.add(p.nome); legenda(); grafico(); });
+      legend.append(b);
+    }
+  }
+  function grafico() {
+    const box = document.getElementById('chart');
+    box.replaceChildren();
+    const S = P.filter((p) => estado.series.has(p.nome));
+    const dias = D.dias30, N = dias.length;
+    const W = Math.max(320, box.clientWidth || 800), H = 260, m = { t: 22, b: 30, l: 8, r: 8 };
+    const tot = dias.map((_, i) => S.reduce((s, p) => s + p.diario[i], 0));
+    const max = Math.max(1, ...tot);
+    const gw = (W - m.l - m.r) / N, bw = Math.max(4, Math.min(22, gw * 0.7));
+    const y = (v) => (v / max) * (H - m.t - m.b);
+    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Entregas por dia nos últimos 30 dias' });
+    svg.append(sv('line', { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, stroke: '#2b2f3a' }));
+    const tip = el('div', { class: 'tip', hidden: '' });
+    dias.forEach((d, i) => {
+      const x = m.l + gw * i + (gw - bw) / 2;
+      const dow = new Date(d + 'T12:00:00Z').getUTCDay();
+      if (dow === 0 || dow === 6) svg.append(sv('rect', { x: m.l + gw * i, y: m.t - 8, width: gw, height: H - m.b - m.t + 8, fill: '#0e1016' }));
+      let base = H - m.b;
+      S.forEach((p, j) => {
+        const v = p.diario[i];
+        if (!v) return;
+        const h = y(v);
+        const top = j === S.length - 1 || S.slice(j + 1).every((q) => !q.diario[i]);
+        svg.append(sv('rect', { x, y: base - h, width: bw, height: h, rx: top ? 4 : 0, fill: HEX[p.nome] }));
+        base -= h;
       });
-      svg.append(sv('text', { x: cx, y: H - 8, 'text-anchor': 'middle', fill: css('var(--muted)'), 'font-size': 11, 'font-family': 'Instrument Sans, sans-serif', text: i === D.semanas.length - 1 ? 'esta semana' : br(s) }));
-      const hit = sv('rect', { x: cx - gw / 2, y: 0, width: gw, height: H, fill: 'transparent' });
+      if (tot[i]) svg.append(sv('text', { x: x + bw / 2, y: base - 5, 'text-anchor': 'middle', fill: '#f5f7ff', 'font-size': 10, 'font-weight': 600, 'font-family': 'Poppins, sans-serif', text: tot[i] }));
+      if (i % 3 === 0 || i === N - 1) svg.append(sv('text', { x: x + bw / 2, y: H - 10, 'text-anchor': 'middle', fill: i === N - 1 ? '#f5f7ff' : '#636a7b', 'font-size': 10, 'font-family': 'Poppins, sans-serif', text: i === N - 1 ? 'hoje' : br(d) }));
+      const hit = sv('rect', { x: m.l + gw * i, y: 0, width: gw, height: H, fill: 'transparent' });
       hit.addEventListener('mousemove', () => {
-        const fim = new Date(Date.parse(s) + 6 * 864e5).toISOString().slice(0, 10);
-        showTip(box, tip, (cx / W) * box.clientWidth, `${br(s)} a ${br(fim)}`, P.map((p) => [p.nome, p.ritmo[i]]));
+        const nomeDia = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][dow];
+        tip.replaceChildren(el('div', { class: 'd', text: `${nomeDia}, ${br(d)}` }), ...S.map((p) => el('div', { class: 'r', style: '--c:' + COR[p.nome], text: `${p.nome}: ${p.diario[i]} ${p.diario[i] === 1 ? 'entrega' : 'entregas'}` })));
+        tip.hidden = false;
+        const px = ((m.l + gw * i + gw / 2) / W) * box.clientWidth, w = tip.offsetWidth;
+        tip.style.left = Math.min(Math.max(0, px - w / 2), box.clientWidth - w) + 'px';
+        tip.style.top = '0px';
       });
       hit.addEventListener('mouseleave', () => { tip.hidden = true; });
       svg.append(hit);
     });
-    box.prepend(svg);
+    box.append(svg, tip);
+    const sum = document.getElementById('chart-sum');
+    const ult7 = S.reduce((s, p) => s + p.diario.slice(-7).reduce((a, b) => a + b, 0), 0);
+    const melhor = tot.indexOf(Math.max(...tot));
+    sum.replaceChildren(
+      el('span', {}, 'Hoje: ', el('b', { text: n(tot[N - 1]) })),
+      el('span', {}, 'Últimos 7 dias: ', el('b', { text: n(ult7) })),
+      el('span', {}, 'Últimos 30 dias: ', el('b', { text: n(tot.reduce((a, b) => a + b, 0)) })),
+      tot[melhor] ? el('span', {}, 'Melhor dia: ', el('b', { text: `${br(dias[melhor])} (${tot[melhor]})` })) : null);
   }
 
-  function diario() {
-    const box = document.getElementById('ch-dia');
+  // ---------- Tempo por tarefa ----------
+  estado.ordemTempo = 'recentes';
+  const tord = document.getElementById('tord');
+  for (const [k, rot] of [['recentes', 'Mais recentes'], ['rapidas', 'Mais rápidas'], ['lentas', 'Mais demoradas']]) {
+    const b = el('button', { type: 'button', 'aria-pressed': String(k === estado.ordemTempo), text: rot });
+    b.addEventListener('click', () => { estado.ordemTempo = k; tord.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); tempoTarefas(); });
+    tord.append(b);
+  }
+  const leadCor = (m) => (m <= 1440 ? 'var(--ok)' : m <= 4320 ? 'var(--today)' : 'var(--late)');
+  function tempoTarefas() {
+    const V = visiveis();
+    const kp = document.getElementById('tkpis');
+    kp.replaceChildren();
+    for (const p of V) {
+      kp.append(el('div', { class: 'tk', style: '--c:' + COR[p.nome] }, el('span', { class: 'k', text: `${p.nome} · tempo típico por tarefa` }),
+        el('span', { class: 'v num', text: dur(p.lead_mediano) }),
+        el('span', { class: 's', text: p.lead_total ? `${n(p.lead_rapidas)} de ${n(p.lead_total)} entregues em até 1 dia` : 'sem entregas no período' })));
+    }
+    const itens = V.flatMap((p) => (p.tempos_tarefas || []).map((t) => ({ ...t, pessoa: p.nome })));
+    if (estado.ordemTempo === 'rapidas') itens.sort((a, b) => a.minutos - b.minutos);
+    else if (estado.ordemTempo === 'lentas') itens.sort((a, b) => b.minutos - a.minutos);
+    else itens.sort((a, b) => (b.fechada || '').localeCompare(a.fechada || ''));
+    const max = Math.max(1, ...itens.map((t) => t.minutos));
+    const box = document.getElementById('tlist');
     box.replaceChildren();
-    const W = Math.max(300, box.clientWidth), H = 200, m = { t: 14, b: 24, l: 26, r: 8 };
-    const dias = D.dias30, N = dias.length;
-    const max = Math.max(1, ...P.flatMap((p) => p.diario));
-    const x = (i) => m.l + (i / (N - 1)) * (W - m.l - m.r);
-    const y = (v) => H - m.b - (v / max) * (H - m.t - m.b);
-    const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Entregas por dia nos últimos 30 dias' });
-    const defs = sv('defs');
-    svg.append(defs);
-    const ticks = [0, Math.round(max / 2), max].filter((v, i, a) => a.indexOf(v) === i);
-    for (const v of ticks) {
-      svg.append(sv('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: css('var(--line)'), 'stroke-dasharray': v ? '2 4' : '' }));
-      svg.append(sv('text', { x: m.l - 6, y: y(v) + 4, 'text-anchor': 'end', fill: css('var(--dim)'), 'font-size': 10, 'font-family': 'Instrument Sans, sans-serif', text: v }));
+    if (!itens.length) { box.append(el('div', { class: 'empty', text: 'Nenhuma entrega com tempo calculado no período.' })); return; }
+    for (const t of itens) {
+      box.append(el('div', { class: 'trow', style: '--tc:' + leadCor(t.minutos) },
+        el('span', { class: 'mini-av', style: '--c:' + COR[t.pessoa], 'aria-label': t.pessoa, text: t.pessoa[0] }),
+        el('span', {}, titulo(t, 't'), el('span', { class: 'sub', style: 'display:block', text: `entregue ${br(t.fechada)}${t.destino ? ' · ' + t.destino : ''}` })),
+        el('div', { class: 'tb', 'aria-hidden': 'true' }, el('div', { style: `width:${Math.max(2, (Math.sqrt(t.minutos) / Math.sqrt(max)) * 100)}%` })),
+        el('span', { class: 'tv' }, (t.aprox ? '≈ ' : '') + dur(t.minutos), t.producao ? el('small', { text: dur(t.producao) + ' em produção' }) : null)));
     }
-    P.forEach((p, j) => {
-      const c = css(cor(p.nome)), gid = 'g' + j;
-      defs.append(sv('linearGradient', { id: gid, x1: 0, x2: 0, y1: 0, y2: 1 },
-        sv('stop', { offset: 0, 'stop-color': c, 'stop-opacity': .28 }), sv('stop', { offset: 1, 'stop-color': c, 'stop-opacity': 0 })));
-      const pts = p.diario.map((v, i) => `${x(i)},${y(v)}`);
-      svg.append(sv('path', { d: `M${x(0)},${y(0)} L${pts.join(' L')} L${x(N - 1)},${y(0)} Z`, fill: `url(#${gid})` }));
-      svg.append(sv('path', { d: `M${pts.join(' L')}`, fill: 'none', stroke: c, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
-      svg.append(sv('circle', { cx: x(N - 1), cy: y(p.diario[N - 1]), r: 4, fill: c }));
-    });
-    [0, 7, 14, 21, 29].forEach((i) => svg.append(sv('text', { x: x(i), y: H - 6, 'text-anchor': i === 0 ? 'start' : i === 29 ? 'end' : 'middle', fill: css('var(--muted)'), 'font-size': 10, 'font-family': 'Instrument Sans, sans-serif', text: i === 29 ? 'hoje' : br(dias[i]) })));
-    const guide = sv('line', { y1: m.t, y2: H - m.b, stroke: css('var(--line-2)'), visibility: 'hidden' });
-    svg.append(guide);
-    const tip = tipFor(box);
-    const hit = sv('rect', { x: m.l, y: 0, width: W - m.l - m.r, height: H, fill: 'transparent' });
-    hit.addEventListener('mousemove', (ev) => {
-      const r = svg.getBoundingClientRect();
-      const px = ((ev.clientX - r.left) / r.width) * W;
-      const i = Math.max(0, Math.min(N - 1, Math.round(((px - m.l) / (W - m.l - m.r)) * (N - 1))));
-      guide.setAttribute('x1', x(i)); guide.setAttribute('x2', x(i)); guide.setAttribute('visibility', 'visible');
-      showTip(box, tip, (x(i) / W) * box.clientWidth, br(dias[i]), P.map((p) => [p.nome, p.diario[i]]));
-    });
-    hit.addEventListener('mouseleave', () => { tip.hidden = true; guide.setAttribute('visibility', 'hidden'); });
-    svg.append(hit);
-    box.prepend(svg);
   }
 
-  // Onde entregou
-  const dest = document.getElementById('dest');
-  const PALETA = ['#a78bfa', '#22d3ee', '#818cf8', '#5eead4', '#c4b5fd', '#93c5fd'];
-  const CORES_DEST = { 'Própria pasta': 'var(--c)' };
-  (D.destinos || []).forEach((d, i) => { CORES_DEST[d] = PALETA[i % PALETA.length]; });
-  for (const p of P) {
-    const tot = Object.values(p.por_destino).reduce((s, v) => s + v, 0);
-    const stack = el('div', { class: 'stack', role: 'img', 'aria-label': `${p.nome}: ` + Object.entries(p.por_destino).map(([k, v]) => `${k} ${v}`).join(', ') });
-    const leg = el('div', { class: 'stack-legend' });
-    for (const [k, v] of Object.entries(p.por_destino)) {
-      if (!v) continue;
-      stack.append(el('div', { style: `background:${CORES_DEST[k] || 'var(--muted)'};width:${(v / tot) * 100}%`, text: n(v) }));
-      leg.append(el('span', { style: '--c:' + (CORES_DEST[k] || 'var(--muted)'), text: `${k} ${n(v)}` }));
-    }
-    if (!tot) stack.append(el('div', { style: 'width:100%;color:var(--muted)', text: 'sem entregas no mês' }));
-    dest.append(el('div', { style: `--c:${cor(p.nome)};display:flex;flex-direction:column;gap:.45rem;margin-top:.5rem` },
-      el('p', { class: 'sub-h', text: p.nome }), stack, leg));
-  }
-  document.getElementById('dest-n').textContent = 'em ' + D.mes_nome;
-
-  // Fila por status
-  const st = document.getElementById('status');
-  for (const p of P) {
-    const wrap = el('div', { class: 'hbars', style: '--c:' + cor(p.nome) }, el('p', { class: 'sub-h', text: `${p.nome} · ${n(p.abertas)} em aberto` }));
-    const max = Math.max(1, ...p.por_status.map((r) => r.total));
-    for (const r of p.por_status.slice(0, 6)) wrap.append(el('div', { class: 'hb' }, el('span', { class: 't', text: r.status }), el('div', { class: 'tr' }, el('div', { style: `width:${(r.total / max) * 100}%` })), el('span', { class: 'n', text: n(r.total) })));
-    if (!p.por_status.length) wrap.append(el('p', { class: 'note', text: 'Nada em aberto.' }));
-    st.append(wrap);
-  }
-  st.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:1.25rem';
-
-  // Atrasos
-  const atr = document.getElementById('atr');
-  if (!D.atrasos.length) atr.append(el('tr', {}, el('td', { colspan: '5', class: 'empty', text: 'Nenhuma tarefa atrasada. Equipe em dia.' })));
-  for (const t of D.atrasos) {
-    atr.append(el('tr', {},
-      el('td', {}, el('span', { class: 'dot', style: '--c:' + cor(t.pessoa) }), t.pessoa),
-      el('td', {}, link(t)),
-      el('td', {}, el('span', { class: 'pill bad', text: t.dias === 1 ? '1 dia' : t.dias + ' dias' })),
-      el('td', { text: t.status }),
-      el('td', { class: 'dt', text: br(t.prazo) })));
-  }
-
-  // O que fazer
-  const GR = ['Atrasada', 'Hoje', 'Próximos 7 dias', 'Mais adiante', 'Sem prazo'];
-  const todo = document.getElementById('todo');
-  for (const p of P) {
-    const col = el('div', { class: 'todo-col', style: '--c:' + cor(p.nome) }, el('p', { class: 'sub-h', text: p.nome }));
-    for (const g of GR) {
-      const itens = p.fazer.filter((t) => t.grupo === g);
-      if (!itens.length) continue;
-      col.append(el('p', { class: 'grp' + (g === 'Atrasada' ? ' urg' : '') }, g, el('b', { text: n(itens.length) })));
-      const ul = el('ul', { class: 'list' });
-      for (const t of itens) {
-        const tag = t.prioridade === 'Urgente' ? el('span', { class: 'pill bad', text: 'Urgente' })
-          : t.prioridade === 'Alta' ? el('span', { class: 'pill hot', text: 'Alta' }) : el('span', { class: 'dt', style: 'font-size:.78rem;color:var(--muted)', text: br(t.prazo) });
-        ul.append(el('li', {}, el('span', { class: 't' }, link(t), el('span', { class: 'meta', text: t.status + (t.prazo ? ' · ' + br(t.prazo) : '') })), tag));
+  // ---------- Entregas por mês ----------
+  function porMes() {
+    const box = document.getElementById('months');
+    box.replaceChildren();
+    const V = visiveis();
+    const max = Math.max(1, ...V.flatMap((p) => p.mensal || []));
+    const tot90 = V.reduce((s, p) => s + (p.total_90 || 0), 0);
+    document.getElementById('mes-sub').textContent = `${n(tot90)} entregas nos últimos ${D.dias_janela} dias. ${D.mes_nome[0].toUpperCase() + D.mes_nome.slice(1)} ainda está em andamento.`;
+    (D.meses || []).forEach((nome, i) => {
+      const total = V.reduce((s, p) => s + ((p.mensal || [])[i] || 0), 0);
+      const card = el('div', { class: 'month' + (i === D.meses.length - 1 ? ' atual' : '') }, el('h3', {}, nome, el('b', { class: 'num', text: n(total) })));
+      for (const p of V) {
+        const v = (p.mensal || [])[i] || 0;
+        card.append(el('div', { class: 'mbar', style: '--c:' + COR[p.nome] }, el('span', { text: p.nome }), el('div', { class: 'tr' }, el('div', { style: `width:${(v / max) * 100}%` })), el('span', { class: 'v', text: n(v) })));
       }
-      col.append(ul);
-    }
-    if (!p.fazer.length) col.append(el('p', { class: 'empty', text: 'Fila vazia.' }));
-    if (p.fazer_total > p.fazer.length) col.append(el('span', { class: 'more', text: `Mostrando ${p.fazer.length} de ${p.fazer_total}.` }));
-    todo.append(col);
+      box.append(card);
+    });
   }
 
-  // Textos que dependem das pastas de entrega
-  const lista = (arr) => arr.length > 1 ? arr.slice(0, -1).join(', ') + ' ou ' + arr[arr.length - 1] : (arr[0] || '');
-  const destinos = D.destinos || [];
-  document.getElementById('dest-exp').textContent = `Cards que saíram da pasta deles para ${lista(destinos)} também contam como entregues.`;
-  document.getElementById('foot-dados').textContent = `Dados das pastas Raphael e Duda no ClickUp e dos cards deles enviados para ${lista(destinos)}.`;
-  document.getElementById('foot-feito').textContent = 'Contam como feitos: concluído, postado, no instagram, aprovado, fechado, ou card enviado para essas pastas.';
-  document.getElementById('foot-auto').textContent = 'Os dados são atualizados a cada 15 minutos, das 8h às 20h, e esta página se recarrega sozinha.';
+  // ---------- Entregas por perfil ----------
+  function perfis() {
+    const box = document.getElementById('dest');
+    const V = visiveis();
+    box.replaceChildren();
+    document.getElementById('dest-sub').textContent = `Número grande: ${D.mes_nome}. Embaixo: últimos ${D.dias_janela} dias. Clique para ver os cards do mês.`;
+    for (const d of ['Própria pasta', ...(D.destinos || [])]) {
+      const mes = V.map((p) => [p.nome, p.por_destino[d] || 0]);
+      const totMes = mes.reduce((s, [, v]) => s + v, 0);
+      const total = V.reduce((s, p) => s + ((p.por_destino_total || {})[d] || 0), 0);
+      if (!totMes && !total && d === 'Outras pastas') continue;
+      const split = el('div', { class: 'split', 'aria-hidden': 'true' });
+      for (const [nome, v] of mes) if (v) split.append(el('div', { style: `width:${(v / totMes) * 100}%;background:${HEX[nome]}` }));
+      const b = el('button', { type: 'button', class: 'dtile', 'aria-pressed': String(estado.destino === d), style: '--c:' + (DEST[d] || '#94a3b8') },
+        el('span', { class: 'nm', text: d }), el('span', { class: 'n num', text: n(totMes) }), el('span', { class: 'l', text: `${n(total)} em ${D.dias_janela} dias` }), split,
+        el('span', { class: 'l', text: mes.map(([nome, v]) => `${nome} ${v}`).join(' · ') }));
+      b.addEventListener('click', () => { estado.destino = estado.destino === d ? null : d; perfis(); });
+      box.append(b);
+    }
+    const lista = document.getElementById('dlist');
+    lista.replaceChildren();
+    if (!estado.destino) return;
+    const cards = V.flatMap((p) => p.fora_mes.filter((t) => (t.destino || 'Própria pasta') === estado.destino).map((t) => ({ ...t, pessoa: p.nome })));
+    if (estado.destino === 'Própria pasta') { lista.append(el('div', { class: 'empty', text: 'Entregas que ficaram na própria pasta não são listadas aqui.' })); return; }
+    if (!cards.length) { lista.append(el('div', { class: 'empty', text: `Nenhum card enviado para ${estado.destino} em ${D.mes_nome}.` })); return; }
+    for (const t of cards.sort((a, b) => (b.fechada || '').localeCompare(a.fechada || ''))) {
+      lista.append(el('div', { class: 'ditem' }, el('span', { class: 'mini-av', style: '--c:' + COR[t.pessoa], 'aria-label': t.pessoa, text: t.pessoa[0] }), titulo(t), el('span', { class: 'dt', text: br(t.fechada) })));
+    }
+  }
 
-  // Atualização contínua: mostra há quanto tempo veio do ClickUp e recarrega a página
-  const stamp = document.getElementById('stamp');
-  stamp.classList.add('live');
-  const gerado = Date.parse(D.gerado_iso || '');
-  const tempo = () => {
-    if (!gerado) return;
-    const min = Math.max(0, Math.round((Date.now() - gerado) / 60000));
-    stamp.textContent = min < 1 ? 'Atualizado agora' : min < 60 ? `Atualizado há ${min} min` : `Atualizado ${D.gerado_em}`;
-  };
-  tempo();
-  setInterval(tempo, 30000);
-  if (!D.exemplo) setTimeout(() => location.reload(), 10 * 60 * 1000);
+  // ---------- Pendências ----------
+  const busca = document.getElementById('busca');
+  busca.addEventListener('input', () => { estado.busca = busca.value.trim().toLowerCase(); pendencias(); });
+  function pendencias() {
+    const cols = document.getElementById('cols');
+    cols.replaceChildren();
+    const itens = visiveis().flatMap((p) => p.fazer.map((t) => ({ ...t, pessoa: p.nome })))
+      .filter((t) => !estado.busca || t.nome.toLowerCase().includes(estado.busca) || t.status.toLowerCase().includes(estado.busca));
+    for (const [g, rotulo, c] of GRUPOS) {
+      const lista = itens.filter((t) => t.grupo === g);
+      if (g === 'Mais adiante' && !lista.length) continue;
+      const corpo = el('div', { class: 'col-b' });
+      for (const t of lista) {
+        const pri = t.prioridade === 'Urgente' ? el('span', { class: 'pri u', text: 'URGENTE' }) : t.prioridade === 'Alta' ? el('span', { class: 'pri a', text: 'ALTA' }) : null;
+        const atraso = g === 'Atrasada' && t.prazo ? Math.round((Date.parse(D.hoje) - Date.parse(t.prazo)) / 864e5) : null;
+        const inner = [el('span', { class: 't', text: t.nome }),
+          el('span', { class: 'm' }, el('span', { class: 'mini-av', style: '--c:' + COR[t.pessoa], 'aria-label': t.pessoa, text: t.pessoa[0] }),
+            el('span', { class: 'st', style: '--sc:' + stCor(t), text: t.status }), pri,
+            el('span', { text: atraso ? `${atraso} ${atraso === 1 ? 'dia' : 'dias'} de atraso` : br(t.prazo) }))];
+        corpo.append(okUrl(t.url)
+          ? el('a', { class: 'pcard', href: t.url, target: '_blank', rel: 'noopener', style: '--pc:' + COR[t.pessoa] }, ...inner)
+          : el('div', { class: 'pcard', style: '--pc:' + COR[t.pessoa] }, ...inner));
+      }
+      if (!lista.length) corpo.append(el('div', { class: 'col-empty', text: estado.busca ? 'Nada encontrado.' : 'Nada aqui.' }));
+      cols.append(el('div', { class: 'col', style: '--c:' + c }, el('div', { class: 'col-h' }, el('b', { text: rotulo }), el('span', { text: n(lista.length) })), corpo));
+    }
+  }
 
-  const desenhar = () => { semanas(); diario(); };
-  desenhar();
-  let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(desenhar, 120); });
+  function render() { placar(); fazendo(); tempoTarefas(); legenda(); grafico(); porMes(); perfis(); pendencias(); }
+  render();
+  let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(grafico, 120); });
 })();
 </script>
 </body>
