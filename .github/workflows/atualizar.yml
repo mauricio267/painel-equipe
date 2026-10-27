@@ -1,1 +1,79 @@
+name: Atualizar painel
 
+on:
+  schedule:
+    # A cada 15 minutos, das 8h √†s 20h no hor√°rio de Bras√≠lia (11h‚Äì23h UTC).
+    # O GitHub √†s vezes atrasa execu√ß√µes agendadas em alguns minutos.
+    - cron: "*/15 11-23 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Hist√≥rico das entregas (data em que cada card apareceu como feito). Fica no cache do GitHub,
+      # que n√£o √© p√∫blico, para n√£o expor os nomes das tarefas no reposit√≥rio.
+      - uses: actions/cache/restore@v4
+        with:
+          path: estado
+          key: historico-${{ github.run_id }}
+          restore-keys: historico-
+
+      - name: Buscar dados no ClickUp e gerar a p√°gina
+        env:
+          CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
+        run: python3 scripts/build.py
+
+      - uses: actions/cache/save@v4
+        with:
+          path: estado
+          key: historico-${{ github.run_id }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Proteger a p√°gina com senha
+        env:
+          PAGE_PASSWORD: ${{ secrets.PAGE_PASSWORD }}
+        run: |
+          test -n "$PAGE_PASSWORD" || { echo "Falta o segredo PAGE_PASSWORD"; exit 1; }
+          npx --yes staticrypt@3 dist/index.html \
+            -p "$PAGE_PASSWORD" \
+            -s a8cda99b3b56ddd491a7be0d1108170c \
+            -d public \
+            --short \
+            --remember 30 \
+            --template-title "Rapha & Duda" \
+            --template-instructions "Digite a senha para ver o painel." \
+            --template-button "Entrar" \
+            --template-color-primary "#2f7bff" \
+            --template-color-secondary "#04060a"
+          touch public/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
