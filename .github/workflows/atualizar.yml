@@ -36,8 +36,8 @@ jobs:
       - uses: actions/cache/restore@v4
         with:
           path: estado
-          key: historico-${{ github.run_id }}
-          restore-keys: historico-
+          key: historico2-${{ github.run_id }}
+          restore-keys: historico2-
 
       - name: Buscar dados no ClickUp e gerar a página
         env:
@@ -47,7 +47,7 @@ jobs:
       - uses: actions/cache/save@v4
         with:
           path: estado
-          key: historico-${{ github.run_id }}
+          key: historico2-${{ github.run_id }}
 
       - uses: actions/setup-node@v4
         with:
