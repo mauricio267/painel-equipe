@@ -155,7 +155,7 @@ def buscar_cronometro(token, desde_ms, tarefas_com_tempo):
                     out.append({"tarefa": tid, "user": uid, "inicio": ini, "fim": agora_ms if rodando else fim,
                                 "minutos": round(int(it.get("time") or ((agora_ms if rodando else fim) - ini)) / 60000),
                                 "rodando": rodando})
-            time.sleep(0.4)
+            time.sleep(0.15)
     print(f"Cronômetro: {len(out)} registros ({origem})")
     return out
 
