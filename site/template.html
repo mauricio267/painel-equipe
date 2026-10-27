@@ -109,7 +109,37 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .chart-sum { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: .75rem; font-size: .85rem; color: var(--muted); }
 .chart-sum b { color: var(--text); }
 
+/* Janela de tempo */
+.days { display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .5rem; margin-bottom: .75rem; }
+.days button { flex: none; border: 1px solid var(--line-2); background: var(--s2); border-radius: 12px; padding: .45rem .8rem; cursor: pointer; text-align: left; line-height: 1.25; }
+.days button b { display: block; font-size: .85rem; }
+.days button span { font-size: .72rem; color: var(--muted); }
+.days button[aria-pressed="true"] { border-color: #facc15; background: rgba(250, 204, 21, .1); }
+.tl { position: relative; }
+.tl-axis { position: relative; height: 1.4rem; margin-left: 4.5rem; border-bottom: 1px solid var(--line-2); }
+.tl-axis span { position: absolute; top: 0; transform: translateX(-50%); font-size: .7rem; color: var(--dim); }
+.tl-lane { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); align-items: center; min-height: 3.6rem; border-bottom: 1px dashed var(--line); }
+.tl-lane > b { font-size: .85rem; color: var(--c); }
+.tl-track { position: relative; height: 2.8rem; background: repeating-linear-gradient(90deg, transparent 0, transparent calc(100% / var(--h) - 1px), var(--line) calc(100% / var(--h) - 1px), var(--line) calc(100% / var(--h))); border-radius: 8px; }
+.tl-blk { position: absolute; top: .3rem; bottom: .3rem; border-radius: 7px; background: var(--c); color: #000; font-size: .7rem; font-weight: 600; padding: .2rem .35rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; min-width: 4px; cursor: default; box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); }
+.tl-blk.alt { filter: brightness(.82); }
+.tl-blk.run { animation: pisca 1.6s ease-in-out infinite; }
+@keyframes pisca { 50% { opacity: .65; } }
+@media (prefers-reduced-motion: reduce) { .tl-blk.run { animation: none; } }
+.tl-tip { position: absolute; z-index: 4; pointer-events: none; background: var(--s3); border: 1px solid var(--line-2); border-radius: 10px; padding: .45rem .65rem; font-size: .78rem; max-width: 20rem; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+.tl-tip .d { color: var(--muted); }
+.tl-sum { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: .85rem; color: var(--muted); margin-top: .75rem; }
+.tl-sum b { color: var(--text); }
+
 /* Tempo por tarefa */
+details.trow { display: block; padding: 0; }
+details.trow > summary { list-style: none; display: grid; grid-template-columns: auto minmax(0, 1.6fr) minmax(6rem, 1fr) 6rem; gap: .75rem; align-items: center; padding: .55rem .75rem; cursor: pointer; }
+details.trow > summary::-webkit-details-marker { display: none; }
+details.trow[open] > summary { border-bottom: 1px solid var(--line-2); }
+.sess { display: flex; flex-wrap: wrap; gap: .4rem; padding: .6rem .75rem .75rem; }
+.sess span { font-size: .75rem; background: var(--s3); border-radius: 8px; padding: .25rem .55rem; font-variant-numeric: tabular-nums; }
+.sess span b { color: var(--text); }
+@media (max-width: 560px) { details.trow > summary { grid-template-columns: auto minmax(0, 1fr) 5rem; } details.trow .tb { display: none; } }
 .tkpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .75rem; margin-bottom: 1rem; }
 .tk { background: var(--s2); border-radius: 14px; padding: .85rem 1rem; border-top: 3px solid var(--c); }
 .tk .k { font-size: .75rem; color: var(--muted); display: block; }
@@ -198,8 +228,14 @@ footer { color: var(--dim); font-size: .78rem; border-top: 1px solid var(--line)
     <div class="doing" id="doing"></div>
   </section>
 
+  <section class="box" id="janela" aria-labelledby="h-jan">
+    <div class="hd"><h2 id="h-jan"><span class="ic" style="--c:#facc15" aria-hidden="true">◫</span>Janela de tempo</h2><p>Em que horário cada um trabalhou em cada demanda, pelo cronômetro do card</p></div>
+    <div class="days" id="days" role="group" aria-label="Escolher o dia"></div>
+    <div class="tl" id="tl"></div>
+  </section>
+
   <section class="box" id="tempo" aria-labelledby="h-tempo">
-    <div class="hd"><h2 id="h-tempo"><span class="ic" style="--c:#22d3ee" aria-hidden="true">◷</span>Tempo por tarefa</h2><p>Da criação do card até a entrega, nos últimos 30 dias</p></div>
+    <div class="hd"><h2 id="h-tempo"><span class="ic" style="--c:#22d3ee" aria-hidden="true">◷</span>Tempo por tarefa</h2><p>Tempo cronometrado dentro de cada card nos últimos 30 dias. Clique para ver os horários.</p></div>
     <div class="tkpis" id="tkpis"></div>
     <div class="tools">
       <div class="seg" role="group" aria-label="Ordenar" id="tord"></div>
@@ -332,7 +368,7 @@ footer { color: var(--dim); font-size: .78rem; border-top: 1px solid var(--line)
           tile('Fazendo agora', n(p.fazendo.length), 'var(--ok)'),
           tile('Para hoje', n(p.hoje), 'var(--today)'),
           tile('Atrasadas', n(p.atrasadas), 'var(--late)'),
-          tile('Tempo por demanda', dur(p.tempo_medio_producao ?? p.tempo_medio_registrado), 'var(--later)'))));
+          tile('Cronometrado hoje', dur(p.crono ? p.crono.por_dia[p.crono.por_dia.length - 1] : null), 'var(--later)'))));
     }
   }
 
@@ -426,38 +462,109 @@ footer { color: var(--dim); font-size: .78rem; border-top: 1px solid var(--line)
       tot[melhor] ? el('span', {}, 'Melhor dia: ', el('b', { text: `${br(dias[melhor])} (${tot[melhor]})` })) : null);
   }
 
-  // ---------- Tempo por tarefa ----------
+  // ---------- Janela de tempo (cronômetro) ----------
+  const hora = (iso) => new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+  const diaSP = (iso) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date(iso));
+  const minDoDia = (iso) => { const [h, m] = hora(iso).split(':').map(Number); return h * 60 + m; };
+  const ultimos7 = D.dias30.slice(-7).reverse();
+  estado.dia = D.hoje;
+  function janela() {
+    const V = visiveis();
+    const days = document.getElementById('days');
+    days.replaceChildren();
+    for (const d of ultimos7) {
+      const tot = V.reduce((s, p) => s + (p.crono ? p.crono.por_dia[D.dias30.indexOf(d)] : 0), 0);
+      const dow = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'][new Date(d + 'T12:00:00Z').getUTCDay()];
+      const b = el('button', { type: 'button', 'aria-pressed': String(d === estado.dia) }, el('b', { text: d === D.hoje ? 'Hoje' : `${dow} ${br(d)}` }), el('span', { text: tot ? dur(tot) + ' cronometrado' : 'sem registro' }));
+      b.addEventListener('click', () => { estado.dia = d; janela(); });
+      days.append(b);
+    }
+    const tl = document.getElementById('tl');
+    tl.replaceChildren();
+    const sess = V.flatMap((p) => ((p.crono && p.crono.sessoes) || []).filter((s) => diaSP(s.inicio) === estado.dia).map((s) => ({ ...s, pessoa: p.nome })));
+    if (!D.tem_cronometro && !D.exemplo) { tl.append(el('div', { class: 'empty', text: 'O ClickUp não devolveu os registros do cronômetro.' })); return; }
+    if (!sess.length) { tl.append(el('div', { class: 'empty', text: 'Ninguém cronometrou tempo neste dia.' })); return; }
+    let h0 = Math.min(8, ...sess.map((s) => Math.floor(minDoDia(s.inicio) / 60)));
+    let h1 = Math.max(19, ...sess.map((s) => Math.ceil((minDoDia(s.inicio) + s.minutos) / 60)));
+    h1 = Math.min(24, h1);
+    const span = (h1 - h0) * 60;
+    const axis = el('div', { class: 'tl-axis', 'aria-hidden': 'true' });
+    for (let h = h0; h <= h1; h += (h1 - h0 > 12 ? 2 : 1)) axis.append(el('span', { style: `left:${((h - h0) * 60 / span) * 100}%`, text: `${h}h` }));
+    tl.append(axis);
+    const tip = el('div', { class: 'tl-tip', hidden: '' });
+    for (const p of V) {
+      const minhas = sess.filter((s) => s.pessoa === p.nome);
+      const track = el('div', { class: 'tl-track', style: `--h:${h1 - h0}` });
+      const cores = {};
+      minhas.forEach((s) => {
+        const ini = minDoDia(s.inicio) - h0 * 60;
+        const left = Math.max(0, (ini / span) * 100), w = Math.max(0.4, (Math.min(s.minutos, span - ini) / span) * 100);
+        cores[s.tarefa] = cores[s.tarefa] ?? Object.keys(cores).length;
+        const blk = el('div', { class: 'tl-blk' + (cores[s.tarefa] % 2 ? ' alt' : '') + (s.rodando ? ' run' : ''), style: `left:${left}%;width:${w}%;--c:${COR[p.nome]}`, tabindex: '0', 'aria-label': `${s.nome}, ${hora(s.inicio)} a ${hora(s.fim)}`, text: s.nome });
+        const mostrar = () => {
+          tip.replaceChildren(el('div', { text: s.nome }), el('div', { class: 'd', text: `${hora(s.inicio)} – ${s.rodando ? 'agora (rodando)' : hora(s.fim)} · ${dur(s.minutos)}` }), s.minutos > 480 ? el('div', { style: 'color:var(--today)', text: '⚠ Mais de 8h seguidas: possível cronômetro esquecido' }) : '');
+          tip.hidden = false;
+          const r = blk.getBoundingClientRect(), base = tl.getBoundingClientRect();
+          tip.style.left = Math.min(Math.max(0, r.left - base.left), base.width - tip.offsetWidth) + 'px';
+          tip.style.top = (r.bottom - base.top + 6) + 'px';
+        };
+        blk.addEventListener('mouseenter', mostrar); blk.addEventListener('focus', mostrar);
+        blk.addEventListener('mouseleave', () => { tip.hidden = true; }); blk.addEventListener('blur', () => { tip.hidden = true; });
+        track.append(blk);
+      });
+      tl.append(el('div', { class: 'tl-lane', style: '--c:' + COR[p.nome] }, el('b', { text: p.nome }), track));
+    }
+    tl.append(tip);
+    const resumo = V.map((p) => {
+      const m = sess.filter((s) => s.pessoa === p.nome);
+      const tot = m.reduce((s, x) => s + x.minutos, 0);
+      const prim = m.length ? m.reduce((a, b) => (a.inicio < b.inicio ? a : b)) : null;
+      const ult = m.length ? m.reduce((a, b) => (a.fim > b.fim ? a : b)) : null;
+      return el('span', {}, `${p.nome}: `, el('b', { text: dur(tot) }), m.length ? ` em ${m.length} ${m.length === 1 ? 'sessão' : 'sessões'}, das ${hora(prim.inicio)} às ${hora(ult.fim)}` : ' sem registro');
+    });
+    tl.append(el('div', { class: 'tl-sum' }, ...resumo));
+  }
+
+  // ---------- Tempo por tarefa (cronômetro) ----------
   estado.ordemTempo = 'recentes';
   const tord = document.getElementById('tord');
-  for (const [k, rot] of [['recentes', 'Mais recentes'], ['rapidas', 'Mais rápidas'], ['lentas', 'Mais demoradas']]) {
+  for (const [k, rot] of [['recentes', 'Mais recentes'], ['mais', 'Mais tempo'], ['menos', 'Menos tempo']]) {
     const b = el('button', { type: 'button', 'aria-pressed': String(k === estado.ordemTempo), text: rot });
     b.addEventListener('click', () => { estado.ordemTempo = k; tord.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); tempoTarefas(); });
     tord.append(b);
   }
-  const leadCor = (m) => (m <= 1440 ? 'var(--ok)' : m <= 4320 ? 'var(--today)' : 'var(--late)');
+  const tempoCor = (m) => (m <= 60 ? 'var(--ok)' : m <= 240 ? 'var(--week)' : m <= 480 ? 'var(--today)' : 'var(--late)');
   function tempoTarefas() {
     const V = visiveis();
     const kp = document.getElementById('tkpis');
     kp.replaceChildren();
     for (const p of V) {
-      kp.append(el('div', { class: 'tk', style: '--c:' + COR[p.nome] }, el('span', { class: 'k', text: `${p.nome} · tempo típico por tarefa` }),
-        el('span', { class: 'v num', text: dur(p.lead_mediano) }),
-        el('span', { class: 's', text: p.lead_total ? `${n(p.lead_rapidas)} de ${n(p.lead_total)} entregues em até 1 dia` : 'sem entregas no período' })));
+      const c = p.crono || { tarefas: [], por_dia: [], total_30: 0 };
+      const hoje = c.por_dia[c.por_dia.length - 1] || 0;
+      const media = c.tarefas.length ? Math.round(c.total_30 / c.tarefas.length) : null;
+      kp.append(el('div', { class: 'tk', style: '--c:' + COR[p.nome] }, el('span', { class: 'k', text: `${p.nome} · cronometrado em 30 dias` }),
+        el('span', { class: 'v num', text: dur(c.total_30) }),
+        el('span', { class: 's', text: `hoje ${dur(hoje)} · ${n(c.tarefas.length)} tarefas · média ${dur(media)} por tarefa` })));
     }
-    const itens = V.flatMap((p) => (p.tempos_tarefas || []).map((t) => ({ ...t, pessoa: p.nome })));
-    if (estado.ordemTempo === 'rapidas') itens.sort((a, b) => a.minutos - b.minutos);
-    else if (estado.ordemTempo === 'lentas') itens.sort((a, b) => b.minutos - a.minutos);
-    else itens.sort((a, b) => (b.fechada || '').localeCompare(a.fechada || ''));
+    const itens = V.flatMap((p) => ((p.crono && p.crono.tarefas) || []).map((t) => ({ ...t, pessoa: p.nome })));
+    if (estado.ordemTempo === 'mais') itens.sort((a, b) => b.minutos - a.minutos);
+    else if (estado.ordemTempo === 'menos') itens.sort((a, b) => a.minutos - b.minutos);
+    else itens.sort((a, b) => (b.ultimo || '').localeCompare(a.ultimo || ''));
     const max = Math.max(1, ...itens.map((t) => t.minutos));
     const box = document.getElementById('tlist');
     box.replaceChildren();
-    if (!itens.length) { box.append(el('div', { class: 'empty', text: 'Nenhuma entrega com tempo calculado no período.' })); return; }
+    if (!itens.length) { box.append(el('div', { class: 'empty', text: 'Nenhum tempo cronometrado nos cards nos últimos 30 dias.' })); return; }
     for (const t of itens) {
-      box.append(el('div', { class: 'trow', style: '--tc:' + leadCor(t.minutos) },
-        el('span', { class: 'mini-av', style: '--c:' + COR[t.pessoa], 'aria-label': t.pessoa, text: t.pessoa[0] }),
-        el('span', {}, titulo(t, 't'), el('span', { class: 'sub', style: 'display:block', text: `entregue ${br(t.fechada)}${t.destino ? ' · ' + t.destino : ''}` })),
-        el('div', { class: 'tb', 'aria-hidden': 'true' }, el('div', { style: `width:${Math.max(2, (Math.sqrt(t.minutos) / Math.sqrt(max)) * 100)}%` })),
-        el('span', { class: 'tv' }, (t.aprox ? '≈ ' : '') + dur(t.minutos), t.producao ? el('small', { text: dur(t.producao) + ' em produção' }) : null)));
+      const sessoes = el('div', { class: 'sess' }, ...[...t.sessoes].sort((a, b) => a.inicio.localeCompare(b.inicio)).map((s) =>
+        el('span', { style: s.minutos > 480 ? 'color:var(--today)' : null, title: s.minutos > 480 ? 'Mais de 8h seguidas: possível cronômetro esquecido ligado' : null }, `${br(diaSP(s.inicio))} `, el('b', { text: `${hora(s.inicio)}–${s.rodando ? 'agora' : hora(s.fim)}` }), ` · ${dur(s.minutos)}${s.minutos > 480 ? ' ⚠ possível cronômetro esquecido' : ''}`)));
+      box.append(el('details', { class: 'trow', style: '--tc:' + tempoCor(t.minutos) },
+        el('summary', {},
+          el('span', { class: 'mini-av', style: '--c:' + COR[t.pessoa], 'aria-label': t.pessoa, text: t.pessoa[0] }),
+          el('span', {}, el('span', { class: 't', text: t.nome }), el('span', { class: 'sub', style: 'display:block', text: `${t.sessoes.length} ${t.sessoes.length === 1 ? 'vez' : 'vezes'} · última em ${br(diaSP(t.ultimo))} às ${hora(t.ultimo)}${t.rodando ? ' · rodando agora' : ''}` })),
+          el('div', { class: 'tb', 'aria-hidden': 'true' }, el('div', { style: `width:${Math.max(2, (t.minutos / max) * 100)}%` })),
+          el('span', { class: 'tv', text: dur(t.minutos) })),
+        sessoes,
+        okUrl(t.url) ? el('div', { style: 'padding:0 .75rem .7rem' }, el('a', { href: t.url, target: '_blank', rel: 'noopener', class: 'sub', text: 'Abrir no ClickUp ↗' })) : null));
     }
   }
 
@@ -538,7 +645,7 @@ footer { color: var(--dim); font-size: .78rem; border-top: 1px solid var(--line)
     }
   }
 
-  function render() { placar(); fazendo(); tempoTarefas(); legenda(); grafico(); porMes(); perfis(); pendencias(); }
+  function render() { placar(); fazendo(); janela(); tempoTarefas(); legenda(); grafico(); porMes(); perfis(); pendencias(); }
   render();
   let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(grafico, 120); });
 })();

@@ -119,6 +119,47 @@ def simplificar(t, pessoa):
 EM_ANDAMENTO = {s.lower() for s in cfg.get("status_em_andamento", [])}
 
 
+def buscar_cronometro(token, desde_ms, tarefas_com_tempo):
+    """Registros do cronômetro do ClickUp ("Track time" dentro do card), com início e fim.
+
+    Devolve uma lista de {tarefa, user, inicio, fim, minutos, rodando}. Tenta primeiro o
+    relatório do workspace; se ele vier vazio (o ClickUp só mostra o tempo dos outros para
+    administradores), lê card a card os que têm tempo registrado.
+    """
+    agora_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+    ids = ",".join(str(p["user_id"]) for p in cfg["pessoas"])
+    out = []
+    resp = api_get(f"/team/{cfg['team_id']}/time_entries",
+                   [("start_date", str(desde_ms)), ("end_date", str(agora_ms)), ("assignee", ids)], token, falhar=False)
+    for e in (resp or {}).get("data") or []:
+        tid = (e.get("task") or {}).get("id")
+        ini, fim, dur = int(e.get("start") or 0), int(e.get("end") or 0), int(e.get("duration") or 0)
+        rodando = dur < 0 or not fim
+        if not tid or not ini:
+            continue
+        out.append({"tarefa": tid, "user": str((e.get("user") or {}).get("id")), "inicio": ini,
+                    "fim": agora_ms if rodando else fim, "minutos": round(((agora_ms - ini) if rodando else dur) / 60000),
+                    "rodando": rodando})
+    origem = "relatório do workspace"
+    if not out:
+        origem = "card a card"
+        for tid in tarefas_com_tempo:
+            r = api_get(f"/task/{tid}/time", [], token, falhar=False)
+            for por_user in (r or {}).get("data") or []:
+                uid = str((por_user.get("user") or {}).get("id"))
+                for it in por_user.get("intervals") or []:
+                    ini, fim = int(it.get("start") or 0), int(it.get("end") or 0)
+                    if not ini or ini < desde_ms:
+                        continue
+                    rodando = not fim
+                    out.append({"tarefa": tid, "user": uid, "inicio": ini, "fim": agora_ms if rodando else fim,
+                                "minutos": round(int(it.get("time") or ((agora_ms if rodando else fim) - ini)) / 60000),
+                                "rodando": rodando})
+            time.sleep(0.4)
+    print(f"Cronômetro: {len(out)} registros ({origem})")
+    return out
+
+
 def tempo_em_status(ids, token):
     """Minutos que cada tarefa passou em cada status (precisa do ClickApp "Total time in Status").
 
@@ -367,7 +408,52 @@ def dados_reais():
            if (not t["feita"] and t["status"].lower() in EM_ANDAMENTO) or (t["feita"] and (t["fechada"] or "") >= limite)}
     tempos = tempo_em_status(ids, token)
     print(f"Tempo em status: {len(tempos)} de {len(ids)} cards")
-    return calcular(pessoas_tarefas, hoje, tempos, hist) | {"exemplo": False}
+    # Cronômetro (tempo disparado dentro do card) dos últimos 30 dias
+    info = {t["id"]: {"nome": t.get("name", ""), "url": t.get("url", ""), "status": (t.get("status") or {}).get("status", "")}
+            for t in recentes}
+    for _, lista in pessoas_tarefas:
+        for t in lista:
+            info.setdefault(t["id"], {"nome": t["nome"], "url": t["url"], "status": t["status"]})
+    com_tempo = {t["id"] for _, lista in pessoas_tarefas for t in lista if t.get("minutos_registrados")}
+    com_tempo |= {t["id"] for t in recentes if int(t.get("time_spent") or 0) > 0}
+    desde30 = int((datetime.now(timezone.utc) - timedelta(days=31)).timestamp() * 1000)
+    registros = buscar_cronometro(token, desde30, com_tempo)
+    dados = calcular(pessoas_tarefas, hoje, tempos, hist) | {"exemplo": False}
+    return anexar_cronometro(dados, registros, info)
+
+
+def anexar_cronometro(dados, registros, info):
+    """Junta ao painel o tempo cronometrado de cada pessoa: por registro, por tarefa e por dia."""
+    iso = lambda ms: datetime.fromtimestamp(ms / 1000, timezone.utc).isoformat()
+    dia_sp = lambda ms: datetime.fromtimestamp(ms / 1000, TZ).date().isoformat()
+    por_nome = {p["nome"]: p for p in cfg["pessoas"]}
+    for pessoa in dados["pessoas"]:
+        uid = str(por_nome[pessoa["nome"]]["user_id"])
+        meus = sorted((r for r in registros if r["user"] == uid), key=lambda r: r["inicio"], reverse=True)
+        sessoes = [{"tarefa": r["tarefa"], **info.get(r["tarefa"], {"nome": "(card sem acesso)", "url": "", "status": ""}),
+                    "inicio": iso(r["inicio"]), "fim": iso(r["fim"]), "minutos": r["minutos"], "rodando": r["rodando"],
+                    "dia": dia_sp(r["inicio"])} for r in meus]
+        por_tarefa = {}
+        for s in sessoes:
+            t = por_tarefa.setdefault(s["tarefa"], {"tarefa": s["tarefa"], "nome": s["nome"], "url": s["url"], "status": s["status"],
+                                                    "minutos": 0, "sessoes": [], "ultimo": s["inicio"], "rodando": False})
+            t["minutos"] += s["minutos"]
+            t["sessoes"].append({"inicio": s["inicio"], "fim": s["fim"], "minutos": s["minutos"], "rodando": s["rodando"]})
+            t["rodando"] = t["rodando"] or s["rodando"]
+        tarefas = sorted(por_tarefa.values(), key=lambda t: t["ultimo"], reverse=True)
+        por_dia = {d: 0 for d in dados["dias30"]}
+        for s in sessoes:
+            if s["dia"] in por_dia:
+                por_dia[s["dia"]] += s["minutos"]
+        pessoa["crono"] = {
+            "sessoes": sessoes[:400],
+            "tarefas": tarefas[:80],
+            "por_dia": [por_dia[d] for d in dados["dias30"]],
+            "total_30": sum(s["minutos"] for s in sessoes),
+            "rodando": [s for s in sessoes if s["rodando"]],
+        }
+    dados["tem_cronometro"] = bool(registros)
+    return dados
 
 
 HISTORICO = RAIZ / "estado" / "historico.json"
@@ -449,7 +535,20 @@ def dados_exemplo():
               **{f"ex{50 + i}": {"atual": {}, "producao": 200 + i * 40} for i in range(8)}}
     hist = {f"h{i}": {"d": d(i), "dest": ["FERNANDA", "ALIANÇA", None, "SUMMIT", "ANDERSON"][i % 5], "p": ["Duda" if i % 3 else "Rapha"]}
             for i in range(60)}
-    return calcular(pessoas, h, tempos, hist) | {"exemplo": True}
+    dados = calcular(pessoas, h, tempos, hist) | {"exemplo": True}
+    # Sessões de cronômetro de exemplo, em horário comercial dos últimos dias
+    registros, info = [], {}
+    base = datetime.now(TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+    for (p, lista), uid in zip(pessoas, [cfg["pessoas"][0]["user_id"], cfg["pessoas"][1]["user_id"]]):
+        for k, t in enumerate(lista[:10]):
+            info[t["id"]] = {"nome": t["nome"], "url": t["url"], "status": t["status"]}
+            for s in range(1 + k % 3):
+                dia_ = base - timedelta(days=(k + s) % 6)
+                ini = dia_.replace(hour=8 + (k * 2 + s * 3) % 10, minute=(k * 13) % 60)
+                fim = ini + timedelta(minutes=25 + (k * 17 + s * 11) % 140)
+                registros.append({"tarefa": t["id"], "user": str(uid), "inicio": int(ini.timestamp() * 1000),
+                                  "fim": int(fim.timestamp() * 1000), "minutos": int((fim - ini).total_seconds() // 60), "rodando": False})
+    return anexar_cronometro(dados, registros, info)
 
 
 def main():
