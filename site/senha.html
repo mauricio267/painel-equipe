@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="staticrypt-html">
+<head>
+<meta charset="utf-8">
+<title>/*[|template_title|]*/0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="cache-control" content="max-age=0">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<meta http-equiv="pragma" content="no-cache">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: cenário espacial à esquerda (planeta, luas, estrelas, estrelas cadentes) com o título no rodapé;
+   formulário à direita. No celular, o cenário fica em cima e o formulário embaixo. */
+:root {
+  --space-1: #000000; --space-2: #050507; --space-3: #0b0c10;
+  --panel: #060607; --field: #0f1013; --field-line: #22242b;
+  --text: #ffffff; --muted: #9a9ca6; --dim: #5d606b;
+  --violet: #3b7bff; --violet-hi: #6ea2ff; --blue: #3b7bff; --planet: #3b7bff;
+  --bad: #ff6b86;
+  --font: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--space-1); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+.hidden { display: none !important; }
+
+.loading { height: 100%; display: grid; place-items: center; background: var(--space-1); }
+.spin { width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 3px solid var(--field-line); border-top-color: var(--violet-hi); animation: gira .8s linear infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
+
+.shell { min-height: 100%; display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(22rem, 1fr); background: var(--panel); }
+
+/* ---------- Cenário ---------- */
+.art { position: relative; overflow: hidden; min-height: 100vh; min-height: 100dvh;
+  background: radial-gradient(ellipse at 15% 0%, rgba(59, 123, 255, .14) 0%, transparent 50%), #000; }
+.art canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.planet { position: absolute; width: min(68vw, 46rem); aspect-ratio: 1; left: -6%; top: -32%; border-radius: 50%;
+  /* Planeta escuro iluminado só pela borda */
+  background: radial-gradient(circle at 72% 78%, #0a0b10 0%, #050608 55%, #000 100%);
+  box-shadow: inset 18px 22px 60px rgba(59, 123, 255, .35), inset 3px 4px 10px rgba(140, 180, 255, .45), 0 0 140px 10px rgba(59, 123, 255, .16); }
+.planet svg { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; opacity: .25; }
+.planet svg g { fill: #1a2a55; }
+.ring { position: absolute; width: min(95vw, 64rem); height: min(30vw, 20rem); left: -16%; top: 6%; border: 1px solid rgba(255, 255, 255, .12); border-radius: 50%; transform: rotate(18deg); }
+.ring.two { width: min(88vw, 58rem); height: min(22vw, 15rem); top: 12%; left: -10%; border-color: rgba(255, 255, 255, .07); transform: rotate(22deg); }
+.moon { position: absolute; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #3a3d47 0%, #16171c 55%, #050506 100%);
+  box-shadow: inset 6px 6px 14px rgba(255, 255, 255, .08), 0 0 40px rgba(59, 123, 255, .08); }
+.moon::before, .moon::after { content: ""; position: absolute; border-radius: 50%; background: rgba(0, 0, 0, .45); }
+.moon::before { width: 22%; height: 22%; left: 24%; top: 52%; }
+.moon::after { width: 14%; height: 14%; left: 58%; top: 28%; }
+.moon.m1 { width: min(13vw, 9rem); aspect-ratio: 1; left: 58%; top: 38%; }
+.moon.m2 { width: min(9vw, 6rem); aspect-ratio: 1; left: -2.5%; top: 32%; }
+.moon.m3 { width: min(28vw, 18rem); aspect-ratio: 1; left: 8%; top: 64%; opacity: .55; filter: saturate(.7) brightness(.6); }
+.shoot { position: absolute; height: 1.5px; width: 14rem; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255, 255, 255, .9)); border-radius: 2px; transform: rotate(38deg); transform-origin: right center; filter: drop-shadow(0 0 5px rgba(160, 190, 255, .8)); opacity: 0; }
+.shoot.s1 { right: 22%; top: 28%; }
+.shoot.s2 { right: 52%; top: 62%; width: 9rem; }
+.shoot.s3 { right: 8%; top: 70%; width: 11rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .shoot { animation: cadente 7s ease-in infinite; }
+  .shoot.s2 { animation-delay: 2.4s; } .shoot.s3 { animation-delay: 4.6s; }
+  .planet { animation: respira 12s ease-in-out infinite alternate; }
+  .moon.m1 { animation: boia 9s ease-in-out infinite alternate; }
+}
+@media (prefers-reduced-motion: reduce) { .shoot { opacity: .7; } }
+@keyframes cadente { 0% { opacity: 0; transform: rotate(38deg) translateX(-6rem); } 6% { opacity: 1; } 18% { opacity: 0; transform: rotate(38deg) translateX(10rem); } 100% { opacity: 0; transform: rotate(38deg) translateX(10rem); } }
+@keyframes respira { to { transform: translate(1.5rem, .75rem); } }
+@keyframes boia { to { transform: translate(-.75rem, 1.25rem); } }
+
+.logo { position: absolute; z-index: 2; top: max(1.75rem, env(safe-area-inset-top, 0px)); left: max(2rem, env(safe-area-inset-left, 0px)); display: flex; align-items: center; gap: .7rem; }
+.logo svg { flex: none; }
+.logo b { display: block; font-weight: 700; font-size: 1.2rem; line-height: 1; }
+.logo small { display: block; font-size: .6rem; letter-spacing: .45em; color: var(--muted); margin-top: .25rem; text-transform: uppercase; }
+.slogan { position: absolute; z-index: 2; left: max(2.5rem, env(safe-area-inset-left, 0px)); bottom: max(2.5rem, env(safe-area-inset-bottom, 0px)); margin: 0;
+  font-weight: 800; font-size: clamp(2rem, 4.2vw, 3.6rem); line-height: 1.02; text-transform: uppercase; letter-spacing: -.01em; text-shadow: 0 6px 30px rgba(10, 0, 40, .6); }
+.slogan span { display: block; }
+.slogan .hi { background: linear-gradient(90deg, #6ea2ff, #b8d0ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ---------- Formulário ---------- */
+.side { position: relative; display: flex; align-items: center; justify-content: center; padding-block: 3rem; padding-left: max(1.5rem, env(safe-area-inset-left, 0px)); padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
+  background: var(--panel); border-left: 1px solid #141519; }
+.form-box { width: 100%; max-width: 27rem; }
+.form-box h1 { margin: 0 0 1.75rem; font-weight: 800; font-size: clamp(2.75rem, 5vw, 4.25rem); line-height: 1; letter-spacing: -.01em; text-transform: uppercase; }
+.lbl { display: block; font-weight: 600; font-size: .9rem; margin-bottom: .8rem; }
+.field { display: flex; align-items: center; gap: .75rem; background: var(--field); border: 1px solid var(--field-line); border-radius: 10px; padding: 0 .4rem 0 1rem; transition: border-color .2s, box-shadow .2s; }
+.field:focus-within { border-color: var(--violet-hi); box-shadow: 0 0 0 4px rgba(59, 123, 255, .2); }
+.field.erro { border-color: var(--bad); box-shadow: 0 0 0 4px rgba(255, 107, 134, .18); }
+.field > svg { flex: none; color: var(--muted); }
+.field input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--text); font: 500 1rem var(--font); padding: 1.05rem 0; }
+.field input::placeholder { color: var(--dim); }
+.eye { flex: none; background: none; border: 0; color: var(--muted); cursor: pointer; padding: .55rem; border-radius: 8px; display: grid; place-items: center; }
+.eye:hover { color: var(--text); }
+.eye:focus-visible { outline: 2px solid var(--violet-hi); outline-offset: -2px; }
+.msg { min-height: 1.3rem; margin: .5rem 0 .25rem; font-size: .85rem; color: var(--bad); }
+.btn { width: 100%; border: 0; border-radius: 12px; padding: 1.05rem; font: 500 1.15rem var(--font); color: #fff; cursor: pointer;
+  background: linear-gradient(90deg, #2a5fe0 0%, var(--blue) 50%, #5b95ff 100%); box-shadow: 0 14px 34px rgba(59, 123, 255, .28); transition: filter .15s, transform .15s; }
+.btn:hover { filter: brightness(1.1); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--violet-hi); outline-offset: 3px; }
+.btn[disabled] { opacity: .7; cursor: wait; }
+.sep { border: 0; border-top: 1px solid var(--field-line); margin: 2rem 0 1.5rem; }
+.remember { display: flex; align-items: center; gap: .65rem; font-size: .9rem; cursor: pointer; user-select: none; }
+.remember input { appearance: none; -webkit-appearance: none; width: 1.15rem; height: 1.15rem; margin: 0; border: 1.5px solid var(--field-line); border-radius: 5px; background: var(--field); display: grid; place-items: center; cursor: pointer; }
+.remember input:checked { background: var(--violet); border-color: var(--violet); }
+.remember input:checked::after { content: ""; width: .32rem; height: .6rem; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+.remember input:focus-visible { outline: 2px solid var(--violet-hi); outline-offset: 2px; }
+.note { margin: 1.25rem 0 0; font-size: .8rem; color: var(--muted); line-height: 1.5; }
+.note b { color: var(--violet-hi); font-weight: 500; }
+.copy { position: absolute; bottom: max(1.25rem, env(safe-area-inset-bottom, 0px)); left: 0; right: 0; text-align: center; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin: 0; }
+@media (prefers-reduced-motion: no-preference) { .tremer { animation: tremer .35s ease; } }
+@keyframes tremer { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+/* ---------- Celular ---------- */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; background: var(--space-2); }
+  .art { min-height: 46vh; min-height: 46dvh; }
+  .planet { width: 88vw; left: 8%; top: -38%; }
+  .ring { width: 150vw; height: 46vw; left: -30%; top: 2%; }
+  .ring.two { width: 140vw; height: 36vw; top: 8%; left: -24%; }
+  .moon.m1 { width: 18vw; left: 72%; top: 46%; }
+  .moon.m2 { width: 22vw; left: -6%; top: 52%; }
+  .moon.m3 { display: none; }
+  .slogan { font-size: clamp(1.5rem, 7vw, 2.25rem); left: max(1.5rem, env(safe-area-inset-left, 0px)); bottom: 1.25rem; }
+  .logo { left: max(1.5rem, env(safe-area-inset-left, 0px)); }
+  .side { align-items: flex-start; padding-top: 2rem; padding-bottom: 4rem; background: linear-gradient(180deg, var(--space-2), var(--panel)); }
+  .form-box h1 { font-size: clamp(2.5rem, 12vw, 3.25rem); margin-bottom: 1.25rem; }
+}
+</style>
+</head>
+<body class="staticrypt-body">
+<div id="staticrypt_loading" class="loading"><div class="spin" aria-label="Carregando"></div></div>
+
+<div id="staticrypt_content" class="hidden">
+  <div class="shell">
+    <section class="art" aria-label="Ilustração">
+      <canvas id="ceu" aria-hidden="true"></canvas>
+      <div class="ring" aria-hidden="true"></div>
+      <div class="ring two" aria-hidden="true"></div>
+      <div class="planet" aria-hidden="true">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none"><g fill="#0d3b7a">
+          <path d="M8 40 C 18 30, 30 44, 42 36 S 62 28, 70 38 S 88 44, 96 36 L 96 52 C 84 58, 70 48, 58 56 S 34 62, 22 54 S 6 56, 4 50 Z" opacity=".55"/>
+          <path d="M20 66 C 30 60, 44 70, 56 64 S 76 62, 86 70 L 82 80 C 70 76, 58 84, 44 80 S 26 76, 18 80 Z" opacity=".45"/>
+          <path d="M30 14 C 40 10, 52 18, 62 14 S 78 12, 84 18 L 80 24 C 70 22, 58 28, 46 24 S 32 22, 28 20 Z" opacity=".35"/>
+        </g></svg>
+      </div>
+      <div class="moon m1" aria-hidden="true"></div>
+      <div class="moon m2" aria-hidden="true"></div>
+      <div class="moon m3" aria-hidden="true"></div>
+      <i class="shoot s1" aria-hidden="true"></i>
+      <i class="shoot s2" aria-hidden="true"></i>
+      <i class="shoot s3" aria-hidden="true"></i>
+
+      <div class="logo">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 6h18M7 26h18M7 6l9 10-9 10"/></svg>
+        <div><b>Desempenho</b><small>Audiovisual</small></div>
+      </div>
+      <h2 class="slogan"><span>Desempenho de</span><span>Produtividade</span><span class="hi">Audiovisual!</span></h2>
+    </section>
+
+    <section class="side">
+      <div class="form-box" id="card">
+        <h1>Entrar</h1>
+        <form id="staticrypt-form" action="#" method="post" novalidate>
+          <label class="lbl" for="staticrypt-password">/*[|template_instructions|]*/0</label>
+          <div class="field" id="field">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg>
+            <input id="staticrypt-password" type="password" name="password" placeholder="/*[|template_placeholder|]*/0" autocomplete="current-password" autofocus aria-describedby="msg">
+            <button type="button" class="eye" id="eye" aria-label="/*[|template_toggle_show|]*/0" title="/*[|template_toggle_show|]*/0">
+              <svg id="eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A9.7 9.7 0 0 1 12 5c6 0 9.5 7 9.5 7a17 17 0 0 1-3.2 4.1M6.1 6.1A17.4 17.4 0 0 0 2.5 12S6 19 12 19a9.6 9.6 0 0 0 4.2-.9"/></svg>
+              <svg id="eye-on" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="msg" id="msg" role="alert" aria-live="assertive"></p>
+          <button type="submit" class="btn" id="btn">/*[|template_button|]*/0</button>
+
+          <hr class="sep">
+
+          <label id="staticrypt-remember-label" class="remember hidden">
+            <input id="staticrypt-remember" type="checkbox" name="remember">
+            /*[|template_remember|]*/0
+          </label>
+          <p class="note">Painel de desempenho da equipe, atualizado a cada 15 minutos com os dados do ClickUp. O conteúdo é criptografado: sem a senha, ninguém consegue ler.</p>
+        </form>
+      </div>
+      <p class="copy">AH · Audiovisual</p>
+    </section>
+  </div>
+</div>
+
+<script>
+  // Variáveis preenchidas pelo StatiCrypt na hora de gerar a página
+  const staticryptInitiator = /*[|js_staticrypt|]*/ 0;
+  const templateError = "/*[|template_error|]*/0",
+    templateToggleAltShow = "/*[|template_toggle_show|]*/0",
+    templateToggleAltHide = "/*[|template_toggle_hide|]*/0",
+    isRememberEnabled = /*[|is_remember_enabled|]*/ 0,
+    staticryptConfig = /*[|staticrypt_config|]*/ 0;
+
+  const templateConfig = {
+    rememberExpirationKey: "staticrypt_expiration",
+    rememberPassphraseKey: "staticrypt_passphrase",
+    replaceHtmlCallback: null,
+    clearLocalStorageCallback: null,
+  };
+
+  const staticrypt = staticryptInitiator.init(staticryptConfig, templateConfig);
+
+  // Céu estrelado desenhado no canvas
+  function desenharCeu() {
+    const c = document.getElementById("ceu");
+    if (!c || !c.offsetWidth) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = c.offsetWidth, h = c.offsetHeight;
+    c.width = w * dpr; c.height = h * dpr;
+    const g = c.getContext("2d");
+    g.scale(dpr, dpr);
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const n = Math.round((w * h) / 2600);
+    for (let i = 0; i < n; i++) {
+      const x = rnd() * w, y = rnd() * h, r = rnd() < 0.92 ? rnd() * 1.1 + 0.2 : rnd() * 1.8 + 1;
+      g.globalAlpha = 0.35 + rnd() * 0.65;
+      g.fillStyle = rnd() < 0.8 ? "#ffffff" : "#b8ccff";
+      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    }
+    // Estrelas maiores com brilho em cruz
+    for (let i = 0; i < 7; i++) {
+      const x = rnd() * w, y = rnd() * h, s = 6 + rnd() * 10;
+      g.globalAlpha = 0.9;
+      const grad = g.createRadialGradient(x, y, 0, x, y, s);
+      grad.addColorStop(0, "rgba(255,255,255,1)"); grad.addColorStop(1, "rgba(160,190,255,0)");
+      g.fillStyle = grad;
+      g.beginPath(); g.moveTo(x - s, y); g.quadraticCurveTo(x, y, x, y - s); g.quadraticCurveTo(x, y, x + s, y); g.quadraticCurveTo(x, y, x, y + s); g.quadraticCurveTo(x, y, x - s, y); g.fill();
+    }
+    g.globalAlpha = 1;
+  }
+
+  window.onload = async function () {
+    const { isSuccessful } = await staticrypt.handleDecryptOnLoad();
+    if (!isSuccessful) {
+      document.getElementById("staticrypt_loading").classList.add("hidden");
+      document.getElementById("staticrypt_content").classList.remove("hidden");
+      desenharCeu();
+      document.getElementById("staticrypt-password").focus();
+      if (isRememberEnabled) {
+        document.getElementById("staticrypt-remember-label").classList.remove("hidden");
+        document.getElementById("staticrypt-remember").checked = true;
+      }
+    }
+  };
+  let t; window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(desenharCeu, 150); });
+
+  const input = document.getElementById("staticrypt-password");
+  const eye = document.getElementById("eye");
+  eye.addEventListener("click", function () {
+    const mostrar = input.type === "password";
+    input.type = mostrar ? "text" : "password";
+    document.getElementById("eye-on").classList.toggle("hidden", !mostrar);
+    document.getElementById("eye-off").classList.toggle("hidden", mostrar);
+    const alt = mostrar ? templateToggleAltHide : templateToggleAltShow;
+    eye.setAttribute("aria-label", alt);
+    eye.title = alt;
+    input.focus();
+  });
+
+  const field = document.getElementById("field");
+  const msg = document.getElementById("msg");
+  const card = document.getElementById("card");
+  const btn = document.getElementById("btn");
+  input.addEventListener("input", function () { field.classList.remove("erro"); msg.textContent = ""; });
+
+  document.getElementById("staticrypt-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    if (!input.value) { msg.textContent = "Digite a senha."; field.classList.add("erro"); input.focus(); return; }
+    btn.disabled = true;
+    const { isSuccessful } = await staticrypt.handleDecryptionOfPage(input.value, document.getElementById("staticrypt-remember").checked);
+    if (!isSuccessful) {
+      btn.disabled = false;
+      msg.textContent = templateError;
+      field.classList.add("erro");
+      card.classList.remove("tremer"); void card.offsetWidth; card.classList.add("tremer");
+      input.select();
+    }
+  });
+</script>
+</body>
+</html>
