@@ -16,7 +16,8 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # Não cancela uma publicação em andamento: a próxima espera ela terminar
+  cancel-in-progress: false
 
 jobs:
   publicar:
