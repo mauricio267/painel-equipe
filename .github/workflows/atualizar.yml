@@ -2,8 +2,8 @@ name: Atualizar painel
 
 on:
   schedule:
-    # A cada 15 minutos, das 8h √†s 20h no hor√°rio de Bras√≠lia (11h‚Äì23h UTC).
-    # O GitHub √†s vezes atrasa execu√ß√µes agendadas em alguns minutos.
+    # A cada 15 minutos, das 8h às 20h no horário de Brasília (11h–23h UTC).
+    # O GitHub às vezes atrasa execuções agendadas em alguns minutos.
     - cron: "*/15 11-23 * * *"
   workflow_dispatch:
   push:
@@ -31,15 +31,15 @@ jobs:
         with:
           python-version: "3.12"
 
-      # Hist√≥rico das entregas (data em que cada card apareceu como feito). Fica no cache do GitHub,
-      # que n√£o √© p√∫blico, para n√£o expor os nomes das tarefas no reposit√≥rio.
+      # Histórico das entregas (data em que cada card apareceu como feito). Fica no cache do GitHub,
+      # que não é público, para não expor os nomes das tarefas no repositório.
       - uses: actions/cache/restore@v4
         with:
           path: estado
           key: historico-${{ github.run_id }}
           restore-keys: historico-
 
-      - name: Buscar dados no ClickUp e gerar a p√°gina
+      - name: Buscar dados no ClickUp e gerar a página
         env:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
         run: python3 scripts/build.py
@@ -53,22 +53,26 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Proteger a p√°gina com senha
+      - name: Proteger a página com senha
         env:
           PAGE_PASSWORD: ${{ secrets.PAGE_PASSWORD }}
         run: |
           test -n "$PAGE_PASSWORD" || { echo "Falta o segredo PAGE_PASSWORD"; exit 1; }
-          npx --yes staticrypt@3 dist/index.html \
+          npx --yes staticrypt@3.5.4 dist/index.html \
             -p "$PAGE_PASSWORD" \
             -s a8cda99b3b56ddd491a7be0d1108170c \
             -d public \
+            -t site/senha.html \
             --short \
             --remember 30 \
-            --template-title "Rapha & Duda" \
-            --template-instructions "Digite a senha para ver o painel." \
+            --template-title "Desempenho de Produtividade Audiovisual" \
+            --template-instructions "Entre com a senha do painel" \
+            --template-placeholder "Digite a senha" \
+            --template-remember "Lembrar neste navegador por 30 dias" \
             --template-button "Entrar" \
-            --template-color-primary "#2f7bff" \
-            --template-color-secondary "#04060a"
+            --template-error "Senha incorreta. Tente de novo." \
+            --template-toggle-show "Mostrar senha" \
+            --template-toggle-hide "Ocultar senha"
           touch public/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
